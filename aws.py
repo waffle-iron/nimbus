@@ -35,7 +35,7 @@ def fuse_check():
 	fuse = os.popen('which s3fs')
 
 	# If fuse is not installed try and install it if the box is a RHEL/CentOS box.
-	if fuse is None:
+	if fuse == "" or fuse is None:
 		if os.path.isfile('/etc/redhat-release'):
 			try:
 				# Install the Nuclues GPG KEY, and REPO, and then Install Fuse/Fuse-S3FS
