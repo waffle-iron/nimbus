@@ -89,7 +89,7 @@ LOGFILE = '/tmp/' + APP.lower() + '_backup.log'
 LOCALDIR = None
 
 if os.path.isfile(CONFIG_FILE):
-    print('===================================')
+    print('========================================')
     print('Backup Settings: File Succesfully Loaded')
     print(CONFIG_FILE + ' succesfully loaded!')
     print('-----------------------------------')
@@ -106,7 +106,6 @@ if os.path.isfile(CONFIG_FILE):
                 print('\t\t' + 'path: ' + directory.get('path') + APP)
                 print('\t\t' + 'retention(days): ' + directory.get('retention_days'))
                 print('\t\t' + 'type: ' + directory.get('type'))
-            print('\n')
 
         # Load mail sender
         if 'mail_sender' in BACKUP_CONFIG:
@@ -118,7 +117,7 @@ if os.path.isfile(CONFIG_FILE):
             MAIL_RECIPIENTS = BACKUP_CONFIG['mail_recipients']
             print("Mail Recipients: " + MAIL_RECIPIENTS)
 
-    print('===================================')
+    print('========================================')
     print('\n')
 else:
     print("Specified configuration file does not exist. Please check the path and try again!\n")
@@ -131,7 +130,8 @@ Make sure all of the listed directories in the config file exist, or create them
 ***************************************************************************
 '''
 # Make sure all of the directory locations actually exist.. If they dont' then crate them
-print("Checking backup directory paths: \n")
+print("Checking backup directory paths: ")
+print("---------------------------------")
 for directory in DIRECTORY_LIST:
     dir_name = directory.get('directory')
     path = directory.get('path') + APP.lower()
@@ -141,16 +141,16 @@ for directory in DIRECTORY_LIST:
     if not os.path.isdir(path):
         try:
             os.makedirs(path)
-            print(path + " has been created.")
+            print("INFO: " + path + " has been created.")
         except FileNotFoundError:
-            print(path + " could not be created.")
+            print("WARNING " + path + " could not be created.")
     print("\n")
 
     # Setup the local backup directory
     if LOCALDIR is None:
         if dir_type == "local":
             LOCALDIR = path
-            print(LOCALDIR + "directory location set!")
+            print("INFO: " + LOCALDIR + " directory location set!")
         else:
             print()
             raise SystemExit(" ERROR: At least one directory in the configuration must be set to type 'local'!")
@@ -187,20 +187,20 @@ for directory in DIRECTORY_LIST:
     retention = directory.get('retention_days')
 
     # For each file in each directory, run a time date check and remove any files older then the retention period.
-    for file in os.listdir(path):
-        file_create_date = datetime.datetime.fromtimestamp(os.path.getmtime(path + "/" + file))
+    for file_name in os.listdir(path):
+        file_create_date = datetime.datetime.fromtimestamp(os.path.getmtime(path + "/" + file_name))
         file_age = FILEDATE - file_create_date
 
         # If the file is greater then the set retention, then remove the file.
         if file_age.days > int(retention):
             # print(path + "/" + file + " - " + str(file_age.days) + " days old - File removed!")
-            write_log(path + "/" + file + " removed (" + str(file_age.days) + " days old)\n")
+            write_log(path + "/" + file_name + " removed (" + str(file_age.days) + " days old)\n")
             try:
-                os.remove(path + "/" + file)
+                os.remove(path + "/" + file_name)
                 DELETED_FILES += 1
             except OSError as err:
                 print("OS error: {0}".format(err))
-                raise SystemExit(path + "/" + file + " could not be removed.")
+                raise SystemExit(path + "/" + file_name + " could not be removed.")
 
         else:
             KEPT_FILES += 1
@@ -230,7 +230,8 @@ Copy the backups to the remote directories
 ***************************************************************************
 '''
 # For each of the listed directories, copy the backup file from the local directory to the backup locations.
-print("Copying backup from local directory to all included remote directories...\n")
+print("Copying backup from local directory to all included remote directories...")
+print("-------------------------------------------------------------------------\n")
 for directory in DIRECTORY_LIST:
     dir_name = directory.get('directory')
     path = directory.get('path') + APP.lower()
@@ -245,15 +246,16 @@ Print the log report
 ***************************************************************************
 '''
 # Go to All of the backup directories and list out the contents of the dirctories.
-print("Print out directory content reports...\n")
+print("Print out directory content reports...")
+print("--------------------------------------\n")
 for directory in DIRECTORY_LIST:
     dir_name = directory.get('directory')
     path = directory.get('path') + APP.lower() + "/"
-    report_cmd = "ls -lah | grep $x | awk '{print $9,\"   \"$5,\"   \"$6,$7,$8}'"
+    report_cmd = "ls -lah | grep " + file_name + " | awk '{print $9,\"   \"$5,\"   \"$6,$7,$8}'"
     # Write Log Header
     write_log("Files moved to " + path + " folder:\n")
     write_log("============================================================\n")
-    for file in os.listdir(path):
+    for file_name in os.listdir(path):
         execute_ls = os.popen(report_cmd)
         report = execute_ls.read()
         execute_ls.close()

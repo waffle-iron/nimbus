@@ -23,7 +23,9 @@ GITLAB_PATH = '/var/opt/gitlab/backups'
 # Define the function to pass back to the main backup module.
 def gitlab_backup_job(localdir, filedate):
 	# Print a warning to the user letting them know the location of the back up file settings.
+	print('----------------------------------------------------------------------------------------------------------------')
 	print("This job assumes that the backup location set in your /etc/gitlab/gitlab.rb file is set to " + GITLAB_PATH + "\n")
+	print('----------------------------------------------------------------------------------------------------------------')
 
 	# Set the file date (remove the timestamp and just keep the date portion)
 	filedate = str(filedate).split(" ")
@@ -39,12 +41,12 @@ def gitlab_backup_job(localdir, filedate):
 			print(GITLAB_PATH + " could not be created.")
 
 	# If any files currently exist in that directory then remove them all..
-	for file in os.listdir(GITLAB_PATH):
+	for file_name in os.listdir(GITLAB_PATH):
 		try:
-			os.remove(GITLAB_PATH + "/" + file)
+			os.remove(GITLAB_PATH + "/" + file_name)
 		except OSError as err:
 			print("OS error: {0}".format(err))
-			raise SystemError(" ERROR: " + file + "could not be removed.")
+			raise SystemError(" ERROR: " + file_name + "could not be removed.")
 
 	print("Running backup job...\n")
 	execute_backup = os.popen('/opt/gitlab/bin/gitlab-rake gitlab:backup:create')
@@ -53,28 +55,33 @@ def gitlab_backup_job(localdir, filedate):
 	execute_backup.close()
 
 	# Grab the gitlab settings file
-	print("Backing up configuration files...\n")
+	print("\n")
+	print("Backing up configuration files...")
+	print("---------------------------------\n")
 	shutil.copyfile('/etc/gitlab/gitlab.rb', GITLAB_PATH + "/gitlab.rb")
 
 	# Tar up the backup and move it to the local backup directory.
-	print("Creating backup archive...\n")
+	print("Creating backup archive...")
+	print("--------------------------\n")
 	# Create the name of the tarball
 	tar_name = '/gitlab_' + str(filedate) + '.tar.gz'
 	tar_path = GITLAB_PATH + tar_name
 
 	# Tar the files
 	tar = tarfile.open(tar_path, 'w:gz')
-	for file in os.listdir(GITLAB_PATH):
-		tar.add(GITLAB_PATH + "/" + file)
+	for file_name in os.listdir(GITLAB_PATH):
+		tar.add(GITLAB_PATH + "/" + file_name)
 	tar.close()
 
 	# Move the backup to the local directory
-	print("Moving backup archive to " + localdir + "...\n")
+	print("Moving backup archive to " + localdir + "...")
+	print("--------------------------------------------\n")
 	try:
 		shutil.move(tar_path, localdir + "/" + tar_name)
 	except OSError as err:
 			print("OS error: {0}".format(err))
 			raise SystemError(" ERROR: Backup could not be moved!")
 
-	print("Job module completed...\n")
+	print("Job backup module completed...")
+	print("-----------------------------\n")
 	return tar_name, job_log
