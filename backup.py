@@ -28,9 +28,9 @@ Define Global Functions Used for all Backup Job types.
 
 def write_log(string):
     try:
-        log = open(LOGFILE, 'a+')
-        log.write(string)
-        log.close()
+        logfile = open(LOGFILE, 'a+')
+        logfile.write(string)
+        logfile.close()
     except IOError:
         print('ERROR: ' + LOGFILE + ' does not exist!')
 
