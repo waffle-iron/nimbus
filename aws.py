@@ -41,7 +41,7 @@ def fuse_check():
 				# Install the Nuclues GPG KEY, and REPO, and then Install Fuse/Fuse-S3FS
 				os.popen('rpm --import http://yum.getnucleus.io/centos/NUCLEUS-GPG-KEY.public')
 
-				with open('/etc/yum.repos.d/nucleus.repo', 'w') as repo_file:
+				with open('/etc/yum.repos.d/nucleus.repo', 'w+') as repo_file:
 					repo_file.write(repo)
 				repo_file.close()
 
@@ -77,7 +77,7 @@ def mount_aws():
 		if aws_id != "" and aws_secret != "":
 			try:
 				# Write the id/secret file
-				with open('~/.passwd-s3fs', 'w') as aws_file:
+				with open('~/.passwd-s3fs', 'w+') as aws_file:
 					aws_file.write(aws_id + ":" + aws_secret)
 				aws_file.close()
 
