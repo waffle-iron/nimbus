@@ -2,7 +2,7 @@
 '''
 ***************************************************************************
 Script:                 Universal Backup Script
-Module:				  	Gitla
+Module:				  	Gitlab
 Authors/Maintainers:    Rich Nason (rnason@getnucleus.io)
 Description:            This script will perform a pluthra of various backups.
 ***************************************************************************

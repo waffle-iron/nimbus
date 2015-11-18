@@ -13,6 +13,8 @@ import datetime  # Used to do file date calculations
 import os  # Used to grab the config files that will be parsed.
 import json  # This is loaded to parse the server_settings.ini file
 import shutil  # Imported to allow easy copy operation
+import smtplib  # Library needed to send the email report
+from email.mime.text import MIMEText  # Extra libraries to set the mimetype of the message
 
 # Import backup job modules:
 from modules.gitlab import gitlab_backup_job  # This imports the gitlab backup job.
@@ -31,7 +33,6 @@ def write_log(string):
         log.close()
     except IOError:
         print('ERROR: ' + LOGFILE + ' does not exist!')
-
 
 '''
 ***************************************************************************
@@ -82,10 +83,9 @@ Set Global Variables and Parese the config file
 # FILEDATE = time.strftime("%Y-%m-%d %H:%M:%S")
 USER = os.getlogin()
 FILEDATE = datetime.datetime.today()
-print(FILEDATE)
 DISPLAYDATE = time.strftime("%a %B %d, %Y")
 MAIL_SUBJECT = APP + ' Backup Report - ' + DISPLAYDATE
-LOGFILE = '/tmp/' + APP + '_backup.log'
+LOGFILE = '/tmp/' + APP.lower() + '_backup.log'
 LOCALDIR = None
 
 if os.path.isfile(CONFIG_FILE):
@@ -105,7 +105,13 @@ if os.path.isfile(CONFIG_FILE):
                 print('\t' + directory.get('directory') + ': ')
                 print('\t\t' + 'path: ' + directory.get('path') + APP)
                 print('\t\t' + 'retention(days): ' + directory.get('retention_days'))
+                print('\t\t' + 'type: ' + directory.get('type'))
             print('\n')
+
+        # Load mail sender
+        if 'mail_sender' in BACKUP_CONFIG:
+            MAIL_SENDER = BACKUP_CONFIG['mail_sender']
+            print("Mail Sender: " + MAIL_SENDER)
 
         # Load mail recipients
         if 'mail_recipients' in BACKUP_CONFIG:
@@ -129,6 +135,7 @@ print("Checking backup directory paths: \n")
 for directory in DIRECTORY_LIST:
     dir_name = directory.get('directory')
     path = directory.get('path') + APP.lower()
+    dir_type = directory.get('type')
 
     # Check to see if the path exists:
     if not os.path.isdir(path):
@@ -141,12 +148,12 @@ for directory in DIRECTORY_LIST:
 
     # Setup the local backup directory
     if LOCALDIR is None:
-        if dir_name == "local_backup_directory":
+        if dir_type == "local":
             LOCALDIR = path
             print(LOCALDIR + "directory location set!")
         else:
             print()
-            raise SystemExit(" ERROR: A configuration item for 'local_backup_directory' must exist in the configuration!")
+            raise SystemExit(" ERROR: At least one directory in the configuration must be set to type 'local'!")
 
 '''
 ***************************************************************************
@@ -228,8 +235,9 @@ print("Copying backup from local directory to all included remote directories...
 for directory in DIRECTORY_LIST:
     dir_name = directory.get('directory')
     path = directory.get('path') + APP.lower()
+    dir_type = directory.get('type')
 
-    if dir_name != "local_backup_directory":
+    if dir_type != "local":
         shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path + "/")
 
 '''
@@ -251,6 +259,8 @@ for directory in DIRECTORY_LIST:
         report = execute_ls.read()
         execute_ls.close()
         write_log(report)
+
+    write_log("\n\n")
 '''
 ***************************************************************************
 Print summary and email the report.
@@ -264,3 +274,19 @@ print("Backup Script completed at " + time.strftime("%H:%M:%S") + " on " + DISPL
 Send the listed administrators notification that the backup job has completed.
 ***************************************************************************
 '''
+# Open a plain text file for reading.  For this example, assume that
+# the text file contains only ASCII characters.
+with open(LOGFILE) as log:
+    # Create a text/plain message
+    MSG = MIMEText(log.read())
+
+# me == the sender's email address
+# you == the recipient's email address
+MSG['Subject'] = MAIL_SUBJECT
+MSG['From'] = MAIL_SENDER
+MSG['To'] = MAIL_RECIPIENTS
+
+# Send the message via our own SMTP server.
+SENDMAIL = smtplib.SMTP('localhost')
+SENDMAIL.send_message(MSG)
+SENDMAIL.quit()
