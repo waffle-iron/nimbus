@@ -66,7 +66,7 @@ def mount_aws():
 	print('Mounting AWS Bucket...\n')
 	# This function will mount the AWS Storage
 	# First check to see if the password file exists
-	key_check = os.path.isfile('~/.passwd-s3fs')
+	key_check = os.path.isfile('/root/.passwd-s3fs')
 
 	if not key_check:
 		aws_id = raw_input("AWS Access Key Id: ")
@@ -77,7 +77,7 @@ def mount_aws():
 		if aws_id != "" and aws_secret != "":
 			try:
 				# Write the id/secret file
-				with open("~/.passwd-s3fs", "a+") as aws_file:
+				with open("/root/.passwd-s3fs", "a+") as aws_file:
 					aws_file.write(aws_id + ":" + aws_secret)
 				aws_file.close()
 
