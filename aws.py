@@ -18,21 +18,23 @@ def fuse_check():
 
 	# Define the Nucleus Repository
 	repo = """
-	[getnucleus_base]
-	name=GetNucleus_CentOS-7 - Base
-	baseurl=http://yum.getnucleus.io/centos/staging/7/base/x86_64/
-	gpgcheck=1
-	gpgkey=file:///etc/pki/rpm-gpg/NUCLEUS-GPG-KEY.public
+[getnucleus_base]
+name=GetNucleus_CentOS-7 - Base
+baseurl=http://yum.getnucleus.io/centos/staging/7/base/x86_64/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/NUCLEUS-GPG-KEY.public
 
-	[getnucleus_custom]
-	name=GetNucleus_CentOS-7 - Custom
-	baseurl=http://yum.getnucleus.io/centos/staging/7/custom/x86_64/
-	gpgcheck=1
-	gpgkey=file:///etc/pki/rpm-gpg/NUCLEUS-GPG-KEY.public
+[getnucleus_custom]
+name=GetNucleus_CentOS-7 - Custom
+baseurl=http://yum.getnucleus.io/centos/staging/7/custom/x86_64/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/NUCLEUS-GPG-KEY.public
 	 """
 
 	# First up, we need to check to see if Fuse is installed.
-	fuse = os.popen('which s3fs')
+	getfuse = os.popen('which s3fs')
+	fuse = getfuse.read()
+	getfuse.close()
 
 	# If fuse is not installed try and install it if the box is a RHEL/CentOS box.
 	if fuse == "" or fuse is None:
@@ -49,14 +51,16 @@ def fuse_check():
 				os.system('yum install fuse fuse-s3fs')
 
 				# Recheck to see if fuse is installed
-				fuse = os.popen('which s3fs')
+				getfuse = os.popen('which s3fs')
+				fuse = getfuse.read()
+				getfuse.close()
 			except:
 				raise SystemError(" FUSE could not be installed, Please install fuse and fuse-s3fs manually and then retry running the job.")
 		else:
 			raise SystemError(" This does not appear to be a RHEL/CentOS server, Please install fuse and fuse-s3fs manually and then retry running the job.")
 
 	# Do a final check and return True or false
-	if fuse is not None:
+	if fuse == "" or fuse is None:
 		fuse_installed = True
 
 	return fuse_installed
