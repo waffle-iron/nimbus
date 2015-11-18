@@ -220,8 +220,7 @@ write_log("============================================================\n")
 
 # Set the logging variable, and execute the backup job.
 ARCHIVE_NAME, JOB_LOG = JOB(LOCALDIR, FILEDATE)
-for line in JOB_LOG:
-    write_log(line + "\n")
+write_log(JOB_LOG + "\n")
 
 write_log("============================================================\n\n")
 
@@ -249,8 +248,8 @@ Print the log report
 print("Print out directory content reports...\n")
 for directory in DIRECTORY_LIST:
     dir_name = directory.get('directory')
-    path = directory.get('path') + APP.lower()
-    report_cmd = "ls -lah | grep $x | awk '{print $9,"   "$5,"   "$6,$7,$8}'"
+    path = directory.get('path') + APP.lower() + "/"
+    report_cmd = "ls -lah | grep $x | awk '{print $9,\"   \"$5,\"   \"$6,$7,$8}'"
     # Write Log Header
     write_log("Files moved to " + path + " folder:\n")
     write_log("============================================================\n")
