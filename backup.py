@@ -251,11 +251,12 @@ print("--------------------------------------\n")
 for directory in DIRECTORY_LIST:
     dir_name = directory.get('directory')
     path = directory.get('path') + APP.lower() + "/"
-    report_cmd = "ls -lah | grep " + file_name + " | awk '{print $9,\"   \"$5,\"   \"$6,$7,$8}'"
     # Write Log Header
     write_log("Files moved to " + path + " folder:\n")
     write_log("============================================================\n")
     for file_name in os.listdir(path):
+        report_cmd = "ls -lah | grep " + file_name + " | awk '{print $9,\t$5,\t$6,$7,$8}'"
+        print(report_cmd)
         execute_ls = os.popen(report_cmd)
         report = execute_ls.read()
         execute_ls.close()
