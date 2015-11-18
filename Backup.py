@@ -12,6 +12,10 @@ import time  # Used to get the current date to apend to logs in pretty format
 import datetime  # Used to do file date calculations
 import os  # Used to grab the config files that will be parsed.
 import json  # This is loaded to parse the server_settings.ini file
+import shutil  # Imported to allow easy copy operation
+
+# Import backup job modules:
+from modules.gitlab import gitlab_backup_job  # This imports the gitlab backup job.
 
 '''
 ***************************************************************************
@@ -64,8 +68,9 @@ CONFIG_FILE = ARGS.config
 
 if BACKUP_JOB == 'GITLAB':
     APP = 'Gitlab'
+    JOB = gitlab_backup_job
 else:
-    raise SystemExit(" You have identified an Undefined Backup Job.. Please try again")
+    raise SystemExit(" ERROR: You have identified an Undefined Backup Job.. Please try again")
 
 '''
 ***************************************************************************
@@ -77,9 +82,11 @@ Set Global Variables and Parese the config file
 # FILEDATE = time.strftime("%Y-%m-%d %H:%M:%S")
 USER = os.getlogin()
 FILEDATE = datetime.datetime.today()
+print(FILEDATE)
 DISPLAYDATE = time.strftime("%a %B %d, %Y")
 MAIL_SUBJECT = APP + ' Backup Report - ' + DISPLAYDATE
 LOGFILE = '/tmp/' + APP + '_backup.log'
+LOCALDIR = None
 
 if os.path.isfile(CONFIG_FILE):
     print('===================================')
@@ -107,6 +114,9 @@ if os.path.isfile(CONFIG_FILE):
 
     print('===================================')
     print('\n')
+else:
+    print("Specified configuration file does not exist. Please check the path and try again!\n")
+    raise SystemExit(" ERROR: Specified Configuration File Not Found")
 
 
 '''
@@ -115,6 +125,7 @@ Make sure all of the listed directories in the config file exist, or create them
 ***************************************************************************
 '''
 # Make sure all of the directory locations actually exist.. If they dont' then crate them
+print("Checking backup directory paths: \n")
 for directory in DIRECTORY_LIST:
     dir_name = directory.get('directory')
     path = directory.get('path') + APP.lower()
@@ -126,6 +137,16 @@ for directory in DIRECTORY_LIST:
             print(path + " has been created.")
         except FileNotFoundError:
             print(path + " could not be created.")
+    print("\n")
+
+    # Setup the local backup directory
+    if LOCALDIR is None:
+        if dir_name == "local_backup_directory":
+            LOCALDIR = path
+            print(LOCALDIR + "directory location set!")
+        else:
+            print()
+            raise SystemExit(" ERROR: A configuration item for 'local_backup_directory' must exist in the configuration!")
 
 '''
 ***************************************************************************
@@ -171,8 +192,9 @@ for directory in DIRECTORY_LIST:
                 os.remove(path + "/" + file)
                 DELETED_FILES += 1
             except OSError as err:
-                print(file + "could not be removed. - ")
                 print("OS error: {0}".format(err))
+                raise SystemExit(path + "/" + file + " could not be removed.")
+
         else:
             KEPT_FILES += 1
             # print(path + "/" + file + " - " + str(file_age.days) + " days old - File saved!")
@@ -185,19 +207,50 @@ write_log(str(KEPT_FILES) + " files are within the retention period and have bee
 Run the backup job
 ***************************************************************************
 '''
+# Write Log header
+write_log("Performing backup operation:\n")
+write_log("============================================================\n")
+
+# Set the logging variable, and execute the backup job.
+ARCHIVE_NAME, JOB_LOG = JOB(LOCALDIR, FILEDATE)
+for line in JOB_LOG:
+    write_log(line + "\n")
+
+write_log("============================================================\n\n")
 
 '''
 ***************************************************************************
 Copy the backups to the remote directories
 ***************************************************************************
 '''
+# For each of the listed directories, copy the backup file from the local directory to the backup locations.
+print("Copying backup from local directory to all included remote directories...\n")
+for directory in DIRECTORY_LIST:
+    dir_name = directory.get('directory')
+    path = directory.get('path') + APP.lower()
+
+    if dir_name != "local_backup_directory":
+        shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path + "/")
 
 '''
 ***************************************************************************
 Print the log report
 ***************************************************************************
 '''
-
+# Go to All of the backup directories and list out the contents of the dirctories.
+print("Print out directory content reports...\n")
+for directory in DIRECTORY_LIST:
+    dir_name = directory.get('directory')
+    path = directory.get('path') + APP.lower()
+    report_cmd = "ls -lah | grep $x | awk '{print $9,"   "$5,"   "$6,$7,$8}'"
+    # Write Log Header
+    write_log("Files moved to " + path + " folder:\n")
+    write_log("============================================================\n")
+    for file in os.listdir(path):
+        execute_ls = os.popen(report_cmd)
+        report = execute_ls.read()
+        execute_ls.close()
+        write_log(report)
 '''
 ***************************************************************************
 Print summary and email the report.
@@ -205,3 +258,9 @@ Print summary and email the report.
 '''
 write_log("Backup Script completed at " + time.strftime("%H:%M:%S") + " on " + DISPLAYDATE + " " + " by " + USER + ".\n")
 print("Backup Script completed at " + time.strftime("%H:%M:%S") + " on " + DISPLAYDATE + " by " + USER + ".\n")
+
+'''
+***************************************************************************
+Send the listed administrators notification that the backup job has completed.
+***************************************************************************
+'''
