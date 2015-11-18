@@ -77,7 +77,7 @@ def mount_aws():
 		if aws_id != "" and aws_secret != "":
 			try:
 				# Write the id/secret file
-				with open('~/.passwd-s3fs', 'w+') as aws_file:
+				with open("~/.passwd-s3fs", "a+") as aws_file:
 					aws_file.write(aws_id + ":" + aws_secret)
 				aws_file.close()
 
