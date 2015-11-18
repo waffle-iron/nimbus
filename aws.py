@@ -86,10 +86,11 @@ def mount_aws():
 				aws_file.close()
 
 				# Set permissions
-				os.chmod('~/.passwd-s3fs', 0o600)
+				os.chmod('/root/.passwd-s3fs', 0o600)
 
 				# Make the temp directory
-				os.mkdir('/tmp/cache', 0o777)
+				os.makedirs('/tmp/cache')
+				os.chmod('/tmp/cache')
 
 				# Mount the storage
 				mount_cmd = 's3fs -o use_cache=/tmp/cache ' + aws_bucket + " " + aws_dir
