@@ -255,8 +255,7 @@ for directory in DIRECTORY_LIST:
     write_log("Files moved to " + path + " folder:\n")
     write_log("============================================================\n")
     for file_name in os.listdir(path):
-        report_cmd = "ls -lah | grep " + file_name + " | awk '{print $9,\t$5,\t$6,$7,$8}'"
-        print(report_cmd)
+        report_cmd = "ls -lah " + path + "| grep " + file_name + " | awk '{print $9,\t$5,\t$6,$7,$8}'"
         execute_ls = os.popen(report_cmd)
         report = execute_ls.read()
         execute_ls.close()
