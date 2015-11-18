@@ -69,15 +69,15 @@ def mount_aws():
 	key_check = os.path.isfile('~/.passwd-s3fs')
 
 	if not key_check:
-		aws_id = os.raw_input("AWS Access Key Id:")
-		aws_secret = os.raw_input("AWS Secret Access Key Id:")
-		aws_bucket = os.raw_input("AWS Bucket to mount:")
-		aws_dir = os.raw_input("Local Directory to mount aws_bucket to")
+		aws_id = raw_input("AWS Access Key Id: ")
+		aws_secret = raw_input("AWS Secret Access Key Id: ")
+		aws_bucket = raw_input("AWS Bucket to mount: ")
+		aws_dir = raw_input("Local Directory to mount aws_bucket to: ")
 
 		if aws_id != "" and aws_secret != "":
 			try:
 				# Write the id/secret file
-				with open('~/.passwd-s3fs') as aws_file:
+				with open('~/.passwd-s3fs', 'w') as aws_file:
 					aws_file.write(aws_id + ":" + aws_secret)
 				aws_file.close()
 
