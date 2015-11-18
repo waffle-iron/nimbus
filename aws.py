@@ -20,13 +20,13 @@ def fuse_check():
 	repo = """
 [getnucleus_base]
 name=GetNucleus_CentOS-7 - Base
-baseurl=http://yum.getnucleus.io/centos/staging/7/base/x86_64/
+baseurl=http://yum.getnucleus.io/centos/prod/7/base/x86_64/
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/NUCLEUS-GPG-KEY.public
 
 [getnucleus_custom]
 name=GetNucleus_CentOS-7 - Custom
-baseurl=http://yum.getnucleus.io/centos/staging/7/custom/x86_64/
+baseurl=http://yum.getnucleus.io/centos/prod/7/custom/x86_64/
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/NUCLEUS-GPG-KEY.public
 	 """
@@ -48,7 +48,7 @@ gpgkey=file:///etc/pki/rpm-gpg/NUCLEUS-GPG-KEY.public
 				repo_file.close()
 
 				os.system('yum clean all')
-				os.system('yum install fuse fuse-s3fs')
+				os.system('yum -y install fuse fuse-s3fs')
 
 				# Recheck to see if fuse is installed
 				getfuse = os.popen('which s3fs')
