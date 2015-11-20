@@ -18,6 +18,7 @@ from email.mime.text import MIMEText  # Extra libraries to set the mimetype of t
 
 # Import backup job modules:
 from modules.gitlab import gitlab_backup_job  # This imports the gitlab backup job.
+from modules.postgres import postgres_backup_job  # This imports the gitlab backup job.
 
 '''
 ***************************************************************************
@@ -70,6 +71,9 @@ CONFIG_FILE = ARGS.config
 if BACKUP_JOB == 'GITLAB':
     APP = 'Gitlab'
     JOB = gitlab_backup_job
+elif BACKUP_JOB == 'POSTGRES':
+    APP = 'PostgreSQL'
+    JOB = postgres_backup_job
 else:
     raise SystemExit(" ERROR: You have identified an Undefined Backup Job.. Please try again")
 
@@ -119,6 +123,7 @@ if os.path.isfile(CONFIG_FILE):
 
     print('========================================')
     print('\n')
+    config_file.close()
 else:
     print("Specified configuration file does not exist. Please check the path and try again!\n")
     raise SystemExit(" ERROR: Specified Configuration File Not Found")
@@ -219,7 +224,7 @@ write_log("Performing backup operation:\n")
 write_log("============================================================\n")
 
 # Set the logging variable, and execute the backup job.
-ARCHIVE_NAME, JOB_LOG = JOB(LOCALDIR, FILEDATE)
+ARCHIVE_NAME, JOB_LOG = JOB(LOCALDIR, FILEDATE, BACKUP_CONFIG)
 write_log(JOB_LOG + "\n")
 
 write_log("============================================================\n\n")

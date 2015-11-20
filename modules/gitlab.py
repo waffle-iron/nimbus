@@ -4,7 +4,7 @@
 Script:                 Universal Backup Script
 Module:				  	Gitlab
 Authors/Maintainers:    Rich Nason (rnason@getnucleus.io)
-Description:            This script will perform a pluthra of various backups.
+Description:            This script will perform gitlab backup jobs.
 ***************************************************************************
 '''
 # This module expects that your backup local directory is set to the default location of /var/opt/gitlab/backups.
@@ -21,7 +21,10 @@ GITLAB_PATH = '/var/opt/gitlab/backups'
 
 
 # Define the function to pass back to the main backup module.
-def gitlab_backup_job(localdir, filedate):
+def gitlab_backup_job(localdir, filedate, config):
+	# We don't need the config in this job so remove the variable to clear pylint errors
+	del config
+
 	# Print a warning to the user letting them know the location of the back up file settings.
 	print('----------------------------------------------------------------------------------------------------------------')
 	print("This job assumes that the backup location set in your /etc/gitlab/gitlab.rb file is set to " + GITLAB_PATH + "\n")
