@@ -93,7 +93,7 @@ class ParseConf(object):
     	for directory in directory_list:
     		print('\t' + directory.get('label') + ': ')
     		print('\t\t' + 'directory: ' + directory.get('directory'))
-    		print('\t\t' + 'path: ' + directory.get('path') + '/' + directory.get('directory'))
+    		print('\t\t' + 'path: ' + directory.get('path'))
     		print('\t\t' + 'retention(days): ' + directory.get('retention_days'))
     		print('\t\t' + 'type: ' + directory.get('type'))
 
