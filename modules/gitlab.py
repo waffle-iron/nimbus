@@ -1,12 +1,12 @@
-#!/usr/bin/python3.4
-'''
+#!/usr/bin/python3
+"""
 ***************************************************************************
-Script:                 Universal Backup Script
-Module:				  	Gitlab
-Authors/Maintainers:    Rich Nason (rnason@getnucleus.io)
-Description:            This script will perform gitlab backup jobs.
+Script:                 Nimbus Intermixed Modular Back Up Script
+Module:					Config Parse class
+Authors/Maintainers:    Rich Nason (rnason@clusterfrak.com)
+Description:            This Module will handle the actual gitlab backup.
 ***************************************************************************
-'''
+"""
 # This module expects that your backup local directory is set to the default location of /var/opt/gitlab/backups.
 # This setting can be found in the /etc/gitlab/gitlab.rb file
 # gitlab_rails['backup_path'] = "/var/opt/gitlab/backups"
