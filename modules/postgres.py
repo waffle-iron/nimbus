@@ -1,12 +1,12 @@
-#!/usr/bin/python3.4
-'''
+#!/usr/bin/python3
+"""
 ***************************************************************************
-Script:                 Universal Backup Script
-Module:				  	Postgres
-Authors/Maintainers:    Rich Nason (rnason@getnucleus.io)
-Description:            This script will perform Postgresql backup jobs.
+Script:                 Nimbus Intermixed Modular Back Up Script
+Module:					Postgres Backup Module
+Authors/Maintainers:    Rich Nason (rnason@clusterfrak.com)
+Description:            This Module will handle the actual postgres backup.
 ***************************************************************************
-'''
+"""
 
 # Define all modules that this script will utilize
 import os  # Imported to allow run of popen to execute the command
@@ -21,7 +21,7 @@ def postgres_backup_job(localdir, filedate, config):
 	print('----------------------------------------------------------------------------------------------------------------')
 	print("This job assumes that the the following: ")
 	print("pg_dump is located in: /usr/pgsql-9.4/bin/pg_dump")
-	print("pg_dumpll is located in /usr/pgsql-9.4/bin/pg_dumpall")
+	print("pg_dumpall is located in /usr/pgsql-9.4/bin/pg_dumpall")
 	print('----------------------------------------------------------------------------------------------------------------\n')
 
 	# Set params for PG_DUMP and PG_DUMPALL
@@ -54,16 +54,18 @@ def postgres_backup_job(localdir, filedate, config):
 
 	# Perform the backup of the databases
 	for database in pgsql_dbs:
-		pg_dump + "-h" + pgsql_creds['pg_host'] + "-p" + pgsql_creds['pg_port'] + "-U" \
+		db_dump_cmd = pg_dump + "-h" + pgsql_creds['pg_host'] + "-p" + pgsql_creds['pg_port'] + "-U" \
 			+ pgsql_creds['pg_user'] + database + " > " + tmp_dir + "/" + database + "-" + filedate + ".sql"
 
+	# execute_backup = os.popen(db_dump_cmd)
+	# job_log = execute_backup.read()
+	# execute_backup.close()
+
 	# Backup the pg_roles
-		pg_dumpall + "-h" + pgsql_creds['pg_host'] + "-p" + pgsql_creds['pg_port'] + "-U" \
+		db_dumpall_cmd = pg_dumpall + "-h" + pgsql_creds['pg_host'] + "-p" + pgsql_creds['pg_port'] + "-U" \
 			+ pgsql_creds['pg_user'] + "-v --globals-only > " + tmp_dir + "/" + "pg_roles-" + filedate + ".sql"
 
 	# Copy the pg_hba and postgres config files
-
-
 	# Tar everything up and move it to the LOCALDIR
 
 	# Remove the tmp file.

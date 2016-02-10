@@ -34,52 +34,58 @@ class ParseConf(object):
     	print('-----------------------------------')
 
     def backup_dirs(self):
-    	# Load list of backup directories
-    	if 'backup_directories' in self.server_config:
-    		# We use the backup_dirs part of the config in other modules, so make it global
-    		directory_list = self.server_config['backup_directories']
+        # Load list of backup directories
+        if 'backup_directories' in self.server_config:
+            # We use the backup_dirs part of the config in other modules, so make it global
+            directory_list = self.server_config['backup_directories']
+            # Verify that the directories exist, and if not...create them
+            for directory in directory_list:
+                # Make sure that all of the required keys exist in the passed dictionary object.
+                if 'directory' in directory.keys():
+                    dir_name = directory.get('directory')
+                    dir_name = str(dir_name)
+                else:
+                    directory['directory'] = None
 
-    		# Verify that the directories exist, and if not...create them
-    		for directory in directory_list:
-    			# Make sure that all of the required keys exist in the passed dictionary object.
-    			if 'directory' in directory.keys():
-    				dir_name = directory.get('directory')
-    			else:
-    				directory['directory'] = None
+                if 'path' in directory.keys():
+                    path = directory.get('path')
+                    print('raw pull: ' + path)
 
-    			if 'path' in directory.keys():
-    				if dir_name is None or dir_name == "":
-    					path = directory.get('path') + "/"
-    				else:
-    					path = directory.get('path') + "/" + dir_name
+                    if not path.endswith('/'):
+                        path = path + "/"
+                        print('Added / to path: ' + path)
 
-    			if 'label' in directory.keys():
-    				label = directory.get('label')
-    				label = str(label)
-    			else:
-    				directory['label'] = None
+                    if dir_name is not None and dir_name != "":
+                        path = path + dir_name + "/"
+                        print('if dir is not blah: ' + path)
 
-    			if 'retention_days' in directory.keys():
-    				retention_days = directory.get('retention_days')
-    				retention_days = int(retention_days)
-    			else:
-    				directory['retention_days'] = 3
+                if 'label' in directory.keys():
+                    label = directory.get('label')
+                    label = str(label)
+                else:
+                    directory['label'] = None
 
-    			if 'type' in directory.keys():
-    				dir_type = directory.get('type')
-    				dir_type = str(dir_type)
-    			else:
-    			 	directory['retention_days'] = 'filesystem'
+                if 'retention_days' in directory.keys():
+                    retention_days = directory.get('retention_days')
+                    retention_days = int(retention_days)
+                else:
+                    directory['retention_days'] = 3
 
-    			# Check to ensure that the path exists
-    			if not self.pyos.path.isdir(path):
-    				try:
-    					self.pyos.makedirs(path)
-    				except FileNotFoundError:
-    					print("WARNING: " + path + "could not be created")
-    	else:
-    		directory_list = '[{directory: "Not Defined, "path": "Not Defined", "retention_days": "Not Defined", "type": "Not Defined"}]'
-    	return directory_list
+                if 'type' in directory.keys():
+                    dir_type = directory.get('type')
+                    dir_type = str(dir_type)
+                else:
+                    directory['retention_days'] = 'filesystem'
+
+                # Check to ensure that the path exists
+                if not self.pyos.path.isdir(path):
+                    try:
+                        self.pyos.makedirs(path)
+                    except FileNotFoundError:
+                        print("WARNING: " + path + "could not be created")
+        else:
+            directory_list = '[{directory: "Not Defined, "path": "Not Defined", "retention_days": "Not Defined", "type": "Not Defined"}]'
+        return directory_list
 
     def print_backup_dirs(self):
     	# Print the list of backup directories defined in the global variable DIRECTORY_LIST

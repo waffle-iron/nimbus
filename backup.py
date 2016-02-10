@@ -180,7 +180,7 @@ KEPT_FILES = 0
 # Cycle through each directory in the list
 for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
-    path = directory.get('path')
+    path = directory.get('path') + "/"
     retention = directory.get('retention_days')
 
     # For each file in each directory, run a time date check and remove any files older then the retention period.
