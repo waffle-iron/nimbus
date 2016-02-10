@@ -49,15 +49,14 @@ class ParseConf(object):
 
                 if 'path' in directory.keys():
                     path = directory.get('path')
-                    print('raw pull: ' + path)
 
                     if not path.endswith('/'):
                         path = path + "/"
-                        print('Added / to path: ' + path)
+                        directory['path'] = path
 
                     if dir_name is not None and dir_name != "":
                         path = path + dir_name + "/"
-                        print('if dir is not blah: ' + path)
+                        directory['path'] = path
 
                 if 'label' in directory.keys():
                     label = directory.get('label')
