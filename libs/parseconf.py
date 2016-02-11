@@ -54,9 +54,9 @@ class ParseConf(object):
                         path = path + "/"
                         directory['path'] = path
 
-                    if dir_name is not None and dir_name != "":
-                        path = path + dir_name + "/"
-                        directory['path'] = path
+                    # if dir_name is not None and dir_name != "":
+                    #     path = path + dir_name + "/"
+                    #     directory['path'] = path
 
                 if 'label' in directory.keys():
                     label = directory.get('label')
@@ -77,11 +77,11 @@ class ParseConf(object):
                     directory['retention_days'] = 'filesystem'
 
                 # Check to ensure that the path exists
-                if not self.pyos.path.isdir(path):
+                if not self.pyos.path.isdir(path + dir_name):
                     try:
-                        self.pyos.makedirs(path)
+                        self.pyos.makedirs(path + dir_name)
                     except FileNotFoundError:
-                        print("WARNING: " + path + "could not be created")
+                        print("WARNING: " + path + dir_name + "could not be created")
         else:
             directory_list = '[{directory: "Not Defined, "path": "Not Defined", "retention_days": "Not Defined", "type": "Not Defined"}]'
         return directory_list

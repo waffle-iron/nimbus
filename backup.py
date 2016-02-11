@@ -107,6 +107,8 @@ LOCALDIR = None
 if os.path.isfile(CONFIG_FILE):
     # Instanciate ParseConfig Object
     CONF = ParseConf(CONFIG_FILE)
+    # OBJ = dir(CONF)
+    # print(OBJ)
 
     # Print out the configuration
     CONF.print_header()
@@ -136,7 +138,7 @@ for directory in CONF.backup_dirs():
     # Setup the local backup directory
     if LOCALDIR is None:
         if dir_type == "local":
-            LOCALDIR = path
+            LOCALDIR = path + dir_name
             print("INFO: " + LOCALDIR + " directory location set!")
         else:
             print()
@@ -182,26 +184,27 @@ for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
     path = directory.get('path')
     retention = directory.get('retention_days')
+    filepath = path + dir_name + "/"
 
     # For each file in each directory, run a time date check and remove any files older then the retention period.
-    for file_name in os.listdir(path):
-        file_create_date = datetime.datetime.fromtimestamp(os.path.getmtime(path + file_name))
+    for file_name in os.listdir(filepath):
+        file_create_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath + file_name))
         file_age = FILEDATE - file_create_date
 
         # If the file is greater then the set retention, then remove the file.
         if file_age.days > int(retention):
             # print(path + file + " - " + str(file_age.days) + " days old - File removed!")
-            write_log(path + file_name + " removed (" + str(file_age.days) + " days old)\n")
+            write_log(filepath + file_name + " removed (" + str(file_age.days) + " days old)\n")
             try:
-                os.remove(path + file_name)
+                os.remove(filepath + file_name)
                 DELETED_FILES += 1
             except OSError as err:
                 print("OS error: {0}".format(err))
-                raise SystemExit(path + file_name + " could not be removed.")
+                raise SystemExit(filepath + file_name + " could not be removed.")
 
         else:
             KEPT_FILES += 1
-            # print(path + file + " - " + str(file_age.days) + " days old - File saved!")
+            # print(path + dir_name + "/" + file_name + " - " + str(file_age.days) + " days old - File saved!")
 write_log("============================================================\n\n")
 write_log(str(DELETED_FILES) + " files exceeded the retention period and have been removed.\n")
 write_log(str(KEPT_FILES) + " files are within the retention period and have been saved.\n\n\n")
@@ -235,7 +238,7 @@ for directory in CONF.backup_dirs():
     dir_type = directory.get('type')
 
     if dir_type != "local":
-        shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path)
+        shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path + dir_name + "/")
 
 '''
 ***************************************************************************
@@ -249,10 +252,10 @@ for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
     path = directory.get('path')
     # Write Log Header
-    write_log("Files moved to " + path + " folder:\n")
+    write_log("Files moved to " + path + dir_name + " folder:\n")
     write_log("============================================================\n")
-    for file_name in os.listdir(path):
-        report_cmd = "ls -lah " + path + "| grep " + file_name + " | awk '{print $9,\t$5,\t$6,$7,$8}'"
+    for file_name in os.listdir(path + dir_name):
+        report_cmd = "ls -lah " + path + dir_name + "| grep " + file_name + " | awk '{print $9,\t$5,\t$6,$7,$8}'"
         execute_ls = os.popen(report_cmd)
         report = execute_ls.read()
         execute_ls.close()
@@ -304,7 +307,7 @@ PAYLOAD = []
 # Get the size of the backup files
 for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
-    path = directory.get('path') + ARCHIVE_NAME
+    path = directory.get('path') + dir_name + "/" + ARCHIVE_NAME
     size = os.path.getsize(path)
     BACKUP_SIZE.append({'file_path': path, 'file_size': size})
 
