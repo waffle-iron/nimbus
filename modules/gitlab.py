@@ -39,6 +39,7 @@ def gitlab_backup_job(localdir, filedate, config):
 	if not os.path.isdir(GITLAB_PATH):
 		try:
 			os.makedirs(GITLAB_PATH)
+			shutil.chown(GITLAB_PATH, user='git', group='git')
 			print(GITLAB_PATH + " has been created.")
 		except FileNotFoundError:
 			print(GITLAB_PATH + " could not be created.")

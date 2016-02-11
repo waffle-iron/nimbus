@@ -281,7 +281,8 @@ Send the listed administrators notification that the backup job has completed.
 with open(LOGFILE) as log:
     # Create a text/plain message to send and to append to the json payload
     MSG = MIMEText(log.read())
-    LOG_CONTENT = MSG
+    LOG_CONTENT = log.read()
+    log.close()
 
 # me == the sender's email address
 # you == the recipient's email address
@@ -307,7 +308,7 @@ PAYLOAD = []
 # Get the size of the backup files
 for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
-    path = directory.get('path') + dir_name + "/" + ARCHIVE_NAME
+    path = directory.get('path') + dir_name + ARCHIVE_NAME
     size = os.path.getsize(path)
     BACKUP_SIZE.append({'file_path': path, 'file_size': size})
 
