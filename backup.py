@@ -180,28 +180,28 @@ KEPT_FILES = 0
 # Cycle through each directory in the list
 for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
-    path = directory.get('path') + "/"
+    path = directory.get('path')
     retention = directory.get('retention_days')
 
     # For each file in each directory, run a time date check and remove any files older then the retention period.
     for file_name in os.listdir(path):
-        file_create_date = datetime.datetime.fromtimestamp(os.path.getmtime(path + "/" + file_name))
+        file_create_date = datetime.datetime.fromtimestamp(os.path.getmtime(path + file_name))
         file_age = FILEDATE - file_create_date
 
         # If the file is greater then the set retention, then remove the file.
         if file_age.days > int(retention):
-            # print(path + "/" + file + " - " + str(file_age.days) + " days old - File removed!")
-            write_log(path + "/" + file_name + " removed (" + str(file_age.days) + " days old)\n")
+            # print(path + file + " - " + str(file_age.days) + " days old - File removed!")
+            write_log(path + file_name + " removed (" + str(file_age.days) + " days old)\n")
             try:
-                os.remove(path + "/" + file_name)
+                os.remove(path + file_name)
                 DELETED_FILES += 1
             except OSError as err:
                 print("OS error: {0}".format(err))
-                raise SystemExit(path + "/" + file_name + " could not be removed.")
+                raise SystemExit(path + file_name + " could not be removed.")
 
         else:
             KEPT_FILES += 1
-            # print(path + "/" + file + " - " + str(file_age.days) + " days old - File saved!")
+            # print(path + file + " - " + str(file_age.days) + " days old - File saved!")
 write_log("============================================================\n\n")
 write_log(str(DELETED_FILES) + " files exceeded the retention period and have been removed.\n")
 write_log(str(KEPT_FILES) + " files are within the retention period and have been saved.\n\n\n")
@@ -235,7 +235,7 @@ for directory in CONF.backup_dirs():
     dir_type = directory.get('type')
 
     if dir_type != "local":
-        shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path + "/")
+        shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path)
 
 '''
 ***************************************************************************
@@ -247,7 +247,7 @@ print("Print out directory content reports...")
 print("--------------------------------------\n")
 for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
-    path = directory.get('path') + "/"
+    path = directory.get('path')
     # Write Log Header
     write_log("Files moved to " + path + " folder:\n")
     write_log("============================================================\n")
@@ -304,7 +304,7 @@ PAYLOAD = []
 # Get the size of the backup files
 for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
-    path = directory.get('path') + "/" + ARCHIVE_NAME
+    path = directory.get('path') + ARCHIVE_NAME
     size = os.path.getsize(path)
     BACKUP_SIZE.append({'file_path': path, 'file_size': size})
 

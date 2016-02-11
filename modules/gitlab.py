@@ -46,10 +46,11 @@ def gitlab_backup_job(localdir, filedate, config):
 	# If any files currently exist in that directory then remove them all..
 	for file_name in os.listdir(GITLAB_PATH):
 		try:
-			os.remove(GITLAB_PATH + "/" + file_name)
+			# os.remove(GITLAB_PATH + "/" + file_name)
+			shutil.rmtree(GITLAB_PATH)
 		except OSError as err:
 			print("OS error: {0}".format(err))
-			raise SystemError(" ERROR: " + file_name + "could not be removed.")
+			raise SystemError(" ERROR: " + file_name + " could not be removed.")
 
 	print("Running backup job...\n")
 	execute_backup = os.popen('/opt/gitlab/bin/gitlab-rake gitlab:backup:create')
