@@ -6,12 +6,11 @@ Authors/Maintainers:    Rich Nason (rnason@clusterfrak.com)
 Description:            This script will perform a pluthra of various backups.
 ***************************************************************************
 """
-# Define all modules that this script will utilize
+# Define all modules that this script will require to function
 import argparse  # Get, and parse incoming arguments from the execution of the script
 import time  # Used to get the current date to apend to logs in pretty format
 import datetime  # Used to do file date calculations
 import os  # Used to grab the config files that will be parsed.
-# import json  # This is loaded to parse the server_settings.ini file
 import shutil  # Imported to allow easy copy operation
 import smtplib  # Library needed to send the email report
 from email.mime.text import MIMEText  # Extra libraries to set the mimetype of the message
@@ -33,6 +32,7 @@ Define Global Functions Used for all Backup Job types.
 
 
 def write_log(string):
+    """The purpose of this function is simply to touch the log file and ensure that it exists"""
     try:
         logfile = open(LOGFILE, 'a+')
         logfile.write(string)
@@ -120,7 +120,6 @@ if os.path.isfile(CONFIG_FILE):
 else:
     print("Specified configuration file does not exist. Please check the path and try again!\n")
     raise SystemExit(" ERROR: Specified Configuration File Not Found")
-
 
 '''
 ***************************************************************************
@@ -314,4 +313,4 @@ for directory in CONF.backup_dirs():
 
 
 PAYLOAD.append({'user': USER, 'last_run': FILEDATE, 'backup_size': BACKUP_SIZE, 'backup_log': LOG_CONTENT})
-print(PAYLOAD)
+# print(PAYLOAD)
