@@ -18,7 +18,6 @@ class ParseConf(object):
         self.configfile = config
         self.server_config = None
 
-        # Check to ensure that the selected file exits, if it doesn't than exit with error
         if self.pyos.path.isfile(self.configfile):
             with open(self.configfile, encoding='utf-8') as self.config_file:
                 self.server_config = self.json.loads(self.config_file.read())
@@ -27,15 +26,7 @@ class ParseConf(object):
             print("Specified configuration file does not exist. Please check the path and try again!\n")
             raise SystemExit(" ERROR: Specified Configuration File Not Found")
 
-        # Check to ensure that the selected file is in valid json format.. if not then exit with error
-        try:
-            self.json.loads(self.configfile)
-        except ValueError as error:
-            print("Config file is not valid JSON. Please validate that the config file and try again!\n")
-            raise SystemExit(error)
-
     def print_header(self):
-        """Print the header to both the screen and to the the log file"""
         print('\n')
         print('===================================')
         print('Backup Settings:')
@@ -43,10 +34,8 @@ class ParseConf(object):
         print('-----------------------------------')
 
     def backup_dirs(self):
-        """Check the config file for all listed directories, if one doesn't exist, then create the directory"""
         # Load list of backup directories
         if 'backup_directories' in self.server_config:
-            # We use the backup_dirs part of the config in other modules, so make it global
             directory_list = self.server_config['backup_directories']
             # Verify that the directories exist, and if not...create them
             for directory in directory_list:
@@ -63,6 +52,10 @@ class ParseConf(object):
                     if not path.endswith('/'):
                         path = path + "/"
                         directory['path'] = path
+
+                    # if dir_name is not None and dir_name != "":
+                    #     path = path + dir_name + "/"
+                    #     directory['path'] = path
 
                 if 'label' in directory.keys():
                     label = directory.get('label')
@@ -93,7 +86,7 @@ class ParseConf(object):
         return directory_list
 
     def print_backup_dirs(self):
-        """Print the list of backup directories defined in the global variable DIRECTORY_LIST"""
+        # Print the list of backup directories defined in the global variable DIRECTORY_LIST
         print('Backup Directories:')
         directory_list = self.backup_dirs()
         for directory in directory_list:
@@ -103,8 +96,21 @@ class ParseConf(object):
             print('\t\t' + 'retention(days): ' + directory.get('retention_days'))
             print('\t\t' + 'type: ' + directory.get('type'))
 
+    def module_args(self):
+        # Load the binary executable location
+        if 'module_args' in self.server_config:
+            module_arg_list = self.json.load(self.server_config['module_args'])
+        else:
+            module_arg_list = None
+        return module_arg_list
+
+    def print_module_args(self):
+        # Print mail sender config
+        module_arg_list = self.module_args()
+        for arg, value in module_arg_list.iteritems():
+            print('\t' + arg + ': ' + value)
+
     def mail_sender(self):
-        """Grab the mail settings from the config file and set mail sender"""
         # Load mail sender config
         if 'mail_sender' in self.server_config:
             mail_sender = self.server_config['mail_sender']
@@ -113,13 +119,11 @@ class ParseConf(object):
         return mail_sender
 
     def print_mail_sender(self):
-        """Grab the mail settings from the config file and print mail sender"""
         # Print mail sender config
         mail_sender = self.mail_sender()
         print("Using Mail Sender: " + str(mail_sender))
 
     def mail_recipients(self):
-        """Grab the mail settings from the config file and set mail recipient list"""
         # Load mail recipients config
         if 'mail_recipients' in self.server_config:
             mail_recipients = self.server_config['mail_recipients']
@@ -128,12 +132,10 @@ class ParseConf(object):
         return mail_recipients
 
     def print_mail_recipients(self):
-        """Grab the mail settings from the config file and print mail recipient list"""
         # Print mail recipients config
         mail_recipients = self.mail_recipients()
         print("Using Mail Recipients: " + str(mail_recipients))
 
     def print_footer(self):
-        """Print the footer to both the screen and to the the log file"""
         print('===================================')
         print('\n')
