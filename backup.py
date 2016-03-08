@@ -6,18 +6,18 @@ Authors/Maintainers:    Rich Nason (rnason@clusterfrak.com)
 Description:            This script will perform a pluthra of various backups.
 ***************************************************************************
 """
-# Define all modules that this script will utilize
+# Define all modules that this script will require to function
 import argparse  # Get, and parse incoming arguments from the execution of the script
 import time  # Used to get the current date to apend to logs in pretty format
 import datetime  # Used to do file date calculations
 import os  # Used to grab the config files that will be parsed.
-# import json  # This is loaded to parse the server_settings.ini file
 import shutil  # Imported to allow easy copy operation
 import smtplib  # Library needed to send the email report
 from email.mime.text import MIMEText  # Extra libraries to set the mimetype of the message
 
 # Import Nimbus class libraries
 from libs.parseconf import ParseConf  # Class to parse the referenced config file.
+from libs.jobselect import module_select  # FN to grab information about the passed in job module.
 
 # Import backup job modules:
 from modules.gitlab import gitlab_backup_job  # This imports the gitlab backup job.
@@ -33,6 +33,7 @@ Define Global Functions Used for all Backup Job types.
 
 
 def write_log(string):
+    """The purpose of this function is simply to allow an easy way to write to the logfile."""
     try:
         logfile = open(LOGFILE, 'a+')
         logfile.write(string)
@@ -47,8 +48,8 @@ Get Passed Arguments and Build the Help feature.
 '''
 # Gather Input Arugments:
 BACKUP_JOB_DESC = """
-The backup job type that you want to run.
-Available Options currently are:
+The backup job module that you want to run.
+Available module options currently are:
 postgres, mysql, gitlab, jenkins
 """
 CONFIG_FILE_DESC = """
@@ -70,23 +71,11 @@ print("Config File: %s" % ARGS.config)
 print('\n')
 
 # Make the backup argument upper case so that we can evaluate what job we need to run.
+# Take the Job named passed in via the -b statement and send it to the jobselector class.
+# This will get information such as the App Name and Actual Function to run for the backup.
 BACKUP_JOB = ARGS.backup.upper()
 CONFIG_FILE = ARGS.config
-
-if BACKUP_JOB == 'GITLAB':
-    APP = 'Gitlab'
-    JOB = gitlab_backup_job
-elif BACKUP_JOB == 'POSTGRES':
-    APP = 'PostgreSQL'
-    JOB = postgres_backup_job
-elif BACKUP_JOB == 'MYSQL':
-    APP = 'MySQL'
-    JOB = mysql_backup_job
-elif BACKUP_JOB == 'JENKINS':
-    APP = 'Jenkins'
-    JOB = jenkins_backup_job
-else:
-    raise SystemExit(" ERROR: You have identified an Undefined Backup Job.. Please try again")
+APP, JOB = module_select(BACKUP_JOB)
 
 '''
 ***************************************************************************
@@ -104,6 +93,7 @@ LOGFILEDIR = '/var/log/nimbus'
 LOGFILE = LOGFILEDIR + '/' + APP.lower() + '_backup.log'
 LOCALDIR = None
 
+# Check to ensure that the config file actually exists.
 if os.path.isfile(CONFIG_FILE):
     # Instanciate ParseConfig Object
     CONF = ParseConf(CONFIG_FILE)
@@ -115,12 +105,12 @@ if os.path.isfile(CONFIG_FILE):
     CONF.print_backup_dirs()
     CONF.print_mail_sender()
     CONF.print_mail_recipients()
+    CONF.print_module_args()
     CONF.print_footer()
 
 else:
     print("Specified configuration file does not exist. Please check the path and try again!\n")
     raise SystemExit(" ERROR: Specified Configuration File Not Found")
-
 
 '''
 ***************************************************************************
@@ -219,7 +209,7 @@ write_log("Performing backup operation:\n")
 write_log("============================================================\n")
 
 # Set the logging variable, and execute the backup job.
-ARCHIVE_NAME, JOB_LOG = JOB(LOCALDIR, FILEDATE, CONF)
+ARCHIVE_NAME, JOB_LOG = JOB(LOCALDIR, FILEDATE, CONF.module_args())
 write_log(JOB_LOG + "\n")
 
 write_log("============================================================\n\n")
@@ -314,4 +304,4 @@ for directory in CONF.backup_dirs():
 
 
 PAYLOAD.append({'user': USER, 'last_run': FILEDATE, 'backup_size': BACKUP_SIZE, 'backup_log': LOG_CONTENT})
-print(PAYLOAD)
+# print(PAYLOAD)

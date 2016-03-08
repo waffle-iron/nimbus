@@ -15,28 +15,27 @@ class ParseConf(object):
     sys = __import__('sys')  # Used to system exit functions on error
 
     def __init__(self, config):
-    	self.configfile = config
-    	self.server_config = None
+        self.configfile = config
+        self.server_config = None
 
-    	if self.pyos.path.isfile(self.configfile):
-    		with open(self.configfile, encoding='utf-8') as self.config_file:
-    			self.server_config = self.json.loads(self.config_file.read())
-    			self.config_file.close()
-    	else:
-    		print("Specified configuration file does not exist. Please check the path and try again!\n")
-    		raise SystemExit(" ERROR: Specified Configuration File Not Found")
+        if self.pyos.path.isfile(self.configfile):
+            with open(self.configfile, encoding='utf-8') as self.config_file:
+                self.server_config = self.json.loads(self.config_file.read())
+                self.config_file.close()
+        else:
+            print("Specified configuration file does not exist. Please check the path and try again!\n")
+            raise SystemExit(" ERROR: Specified Configuration File Not Found")
 
     def print_header(self):
-    	print('\n')
-    	print('===================================')
-    	print('Backup Settings:')
-    	print(self.configfile + ' Succesfully Loaded')
-    	print('-----------------------------------')
+        print('\n')
+        print('===================================')
+        print('Backup Settings:')
+        print(self.configfile + ' Succesfully Loaded')
+        print('-----------------------------------')
 
     def backup_dirs(self):
         # Load list of backup directories
         if 'backup_directories' in self.server_config:
-            # We use the backup_dirs part of the config in other modules, so make it global
             directory_list = self.server_config['backup_directories']
             # Verify that the directories exist, and if not...create them
             for directory in directory_list:
@@ -87,42 +86,59 @@ class ParseConf(object):
         return directory_list
 
     def print_backup_dirs(self):
-    	# Print the list of backup directories defined in the global variable DIRECTORY_LIST
-    	print('Backup Directories:')
-    	directory_list = self.backup_dirs()
-    	for directory in directory_list:
-    		print('\t' + directory.get('label') + ': ')
-    		print('\t\t' + 'directory: ' + directory.get('directory'))
-    		print('\t\t' + 'path: ' + directory.get('path'))
-    		print('\t\t' + 'retention(days): ' + directory.get('retention_days'))
-    		print('\t\t' + 'type: ' + directory.get('type'))
+        # Print the list of backup directories defined in the global variable DIRECTORY_LIST
+        print('Backup Directories:')
+        directory_list = self.backup_dirs()
+        for directory in directory_list:
+            print('\t' + directory.get('label') + ': ')
+            print('\t\t' + 'directory: ' + directory.get('directory'))
+            print('\t\t' + 'path: ' + directory.get('path'))
+            print('\t\t' + 'retention(days): ' + directory.get('retention_days'))
+            print('\t\t' + 'type: ' + directory.get('type'))
+
+    def module_args(self):
+        # Load the binary executable location
+        if 'module_args' in self.server_config:
+            module_arg_list = str(self.server_config['module_args'])
+            module_arg_list = module_arg_list.replace("'","\"")
+        else:
+            module_arg_list = None
+        
+        return module_arg_list
+
+    def print_module_args(self):
+        # Print mail sender config
+        module_arg_list = self.json.loads(self.module_args())
+        print("Module Arguments:")
+        for arg, value in module_arg_list.items():
+            print('\t' + arg + ': ' + value)
 
     def mail_sender(self):
-    	# Load mail sender config
-    	if 'mail_sender' in self.server_config:
-    		mail_sender = self.server_config['mail_sender']
-    	else:
-    		mail_sender = 'root'
-    	return mail_sender
+        # Load mail sender config
+        if 'mail_sender' in self.server_config:
+            mail_sender = self.server_config['mail_sender']
+        else:
+            mail_sender = 'root'
+        return mail_sender
 
     def print_mail_sender(self):
-    	# Print mail sender config
-    	mail_sender = self.mail_sender()
-    	print("Using Mail Sender: " + str(mail_sender))
+        # Print mail sender config
+        mail_sender = self.mail_sender()
+        print("Using Mail Sender: " + str(mail_sender))
 
     def mail_recipients(self):
-    	# Load mail recipients config
-    	if 'mail_recipients' in self.server_config:
-    		mail_recipients = self.server_config['mail_recipients']
-    	else:
-    		mail_recipients = 'root'
-    	return mail_recipients
+        # Load mail recipients config
+        if 'mail_recipients' in self.server_config:
+            mail_recipients = self.server_config['mail_recipients']
+        else:
+            mail_recipients = 'root'
+        return mail_recipients
 
     def print_mail_recipients(self):
-    	# Print mail recipients config
-    	mail_recipients = self.mail_recipients()
-    	print("Using Mail Recipients: " + str(mail_recipients))
+        # Print mail recipients config
+        mail_recipients = self.mail_recipients()
+        print("Using Mail Recipients: " + str(mail_recipients))
 
     def print_footer(self):
-    	print('===================================')
-    	print('\n')
+        print('===================================')
+        print('\n')
