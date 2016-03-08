@@ -99,15 +99,18 @@ class ParseConf(object):
     def module_args(self):
         # Load the binary executable location
         if 'module_args' in self.server_config:
-            module_arg_list = self.json.load(self.server_config['module_args'])
+            module_arg_list = str(self.server_config['module_args'])
+            module_arg_list = module_arg_list.replace("'","\"")
         else:
             module_arg_list = None
+        
         return module_arg_list
 
     def print_module_args(self):
         # Print mail sender config
-        module_arg_list = self.module_args()
-        for arg, value in module_arg_list.iteritems():
+        module_arg_list = self.json.loads(self.module_args())
+        print("Module Arguments:")
+        for arg, value in module_arg_list.items():
             print('\t' + arg + ': ' + value)
 
     def mail_sender(self):

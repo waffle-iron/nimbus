@@ -15,13 +15,18 @@ Description:            This Module will handle the actual gitlab backup.
 import os  # Imported to allow run of popen to execute the command
 import shutil  # Imported to allow easy copy operation
 import tarfile  # Imported to tar up the backup and move it to the local directory location.
-
+import json  # Imported to parse module arguments array
 
 # Define the function to pass back to the main backup module.
 def gitlab_backup_job(localdir, filedate, args):
     """The module will perform the actual gitlab backup"""
     # We don't need the config in this job so remove the variable to clear pylint errors
     # del args
+    
+    # Load the module aregments and jsonify them
+    args = args.replace("'","\"")
+    args = json.loads(args)
+    
     if 'gitlab_backup_path' in args:
         gitlab_path = args['gitlab_backup_path']
     else:
@@ -38,24 +43,27 @@ def gitlab_backup_job(localdir, filedate, args):
     filedate = str(filedate).split(" ")
     filedate = filedate[0]
 
-    # Make a tmp directory and perform the backup, then tar up that directory.
-    # Check to see if the path exists:
-    if not os.path.isdir(gitlab_path):
+    # If any files currently exist in that directory then remove them all..
+    if os.path.isdir(gitlab_path):
+        for file_name in os.listdir(gitlab_path):
+            try:
+                file_path = os.path.join(gitlab_path, file_name)
+                if os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+                else:
+                    os.unlink(file_path)
+                # os.remove(gitlab_path + "/" + file_name)
+                # shutil.rmtree(gitlab_path)
+            except OSError as err:
+                print("OS error: {0}".format(err))
+                raise SystemError(" ERROR: " + file_name + " could not be removed.")
+    else:
         try:
             os.makedirs(gitlab_path)
             shutil.chown(gitlab_path, user='git', group='git')
             print(gitlab_path + " has been created.")
         except FileNotFoundError:
             print(gitlab_path + " could not be created.")
-
-    # If any files currently exist in that directory then remove them all..
-    for file_name in os.listdir(gitlab_path):
-        try:
-            # os.remove(gitlab_path + "/" + file_name)
-            shutil.rmtree(gitlab_path)
-        except OSError as err:
-            print("OS error: {0}".format(err))
-            raise SystemError(" ERROR: " + file_name + " could not be removed.")
 
     print("Running backup job...\n")
     execute_backup = os.popen('/opt/gitlab/bin/gitlab-rake gitlab:backup:create')

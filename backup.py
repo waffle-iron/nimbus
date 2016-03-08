@@ -17,7 +17,7 @@ from email.mime.text import MIMEText  # Extra libraries to set the mimetype of t
 
 # Import Nimbus class libraries
 from libs.parseconf import ParseConf  # Class to parse the referenced config file.
-from libs.jobselect import JobSelector  # Class to grab information about the passed in job module.
+from libs.jobselect import module_select  # FN to grab information about the passed in job module.
 
 # Import backup job modules:
 from modules.gitlab import gitlab_backup_job  # This imports the gitlab backup job.
@@ -75,7 +75,7 @@ print('\n')
 # This will get information such as the App Name and Actual Function to run for the backup.
 BACKUP_JOB = ARGS.backup.upper()
 CONFIG_FILE = ARGS.config
-APP, JOB = JobSelector(BACKUP_JOB)
+APP, JOB = module_select(BACKUP_JOB)
 
 '''
 ***************************************************************************
