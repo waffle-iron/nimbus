@@ -17,4 +17,5 @@ import json  # This is loaded to parse the server_settings.ini file
 
 # Define the function to pass back to the main backup module.
 def jenkins_backup_job(localdir, filedate, config):
-	print('mysql')
+    """This is the actual backup action that will backup jenkins"""
+    print('mysql')

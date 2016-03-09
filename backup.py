@@ -59,7 +59,8 @@ for the backup job that you would like to run.
 """
 
 # Parse input arguments #
-PARSE = argparse.ArgumentParser(description='NIMBUS is a modular backup utility designed to backup many different type of applications')
+PARSE = argparse.ArgumentParser(description='NIMBUS is a modular backup utility \
+                                designed to backup many different type of applications')
 PARSE.add_argument('-b', '--backup', help=BACKUP_JOB_DESC, required=True)
 PARSE.add_argument('-c', '--config', help=CONFIG_FILE_DESC, required=True)
 ARGS = PARSE.parse_args()
@@ -132,7 +133,8 @@ for directory in CONF.backup_dirs():
             print("INFO: " + LOCALDIR + " directory location set!")
         else:
             print()
-            raise SystemExit(" ERROR: At least one directory in the configuration must be set to type 'local'!")
+            raise SystemExit("ERROR: At least one directory in the configuration \
+                             must be set to type 'local'!")
 
 '''
 ***************************************************************************
@@ -176,7 +178,8 @@ for directory in CONF.backup_dirs():
     retention = directory.get('retention_days')
     filepath = path + dir_name + "/"
 
-    # For each file in each directory, run a time date check and remove any files older then the retention period.
+    # For each file in each directory, run a time date check and remove any files
+    # that are older then the retention period.
     for file_name in os.listdir(filepath):
         file_create_date = datetime.datetime.fromtimestamp(os.path.getmtime(filepath + file_name))
         file_age = FILEDATE - file_create_date
@@ -194,7 +197,8 @@ for directory in CONF.backup_dirs():
 
         else:
             KEPT_FILES += 1
-            # print(path + dir_name + "/" + file_name + " - " + str(file_age.days) + " days old - File saved!")
+            # print("File Saved!: ")
+            # print(path + dir_name + "/" + file_name + " - " + str(file_age.days) + " days old")
 write_log("============================================================\n\n")
 write_log(str(DELETED_FILES) + " files exceeded the retention period and have been removed.\n")
 write_log(str(KEPT_FILES) + " files are within the retention period and have been saved.\n\n\n")
@@ -219,7 +223,8 @@ write_log("============================================================\n\n")
 Copy the backups to the remote directories
 ***************************************************************************
 '''
-# For each of the listed directories, copy the backup file from the local directory to the backup locations.
+# For each of the listed directories, copy the backup file from the local directory
+# to each of the backup locations.
 print("Copying backup from local directory to all included remote directories...")
 print("-------------------------------------------------------------------------\n")
 for directory in CONF.backup_dirs():
@@ -245,7 +250,9 @@ for directory in CONF.backup_dirs():
     write_log("Files moved to " + path + dir_name + " folder:\n")
     write_log("============================================================\n")
     for file_name in os.listdir(path + dir_name):
-        report_cmd = "ls -lah " + path + dir_name + "| grep " + file_name + " | awk '{print $9,\t$5,\t$6,$7,$8}'"
+        report_cmd = "ls -lah " + path + dir_name + "| grep " + file_name + \
+        " | awk '{print $9,\t$5,\t$6,$7,$8}'"
+
         execute_ls = os.popen(report_cmd)
         report = execute_ls.read()
         execute_ls.close()
@@ -258,8 +265,10 @@ for directory in CONF.backup_dirs():
 Print summary and email the report.
 ***************************************************************************
 '''
-write_log("Backup Script completed at " + time.strftime("%H:%M:%S") + " on " + DISPLAYDATE + " " + " by " + USER + ".\n")
-print("Backup Script completed at " + time.strftime("%H:%M:%S") + " on " + DISPLAYDATE + " by " + USER + ".\n")
+write_log("Backup Script completed at " + time.strftime("%H:%M:%S") + \
+          " on " + DISPLAYDATE + " " + " by " + USER + ".\n")
+print("Backup Script completed at " + time.strftime("%H:%M:%S") + \
+      " on " + DISPLAYDATE + " by " + USER + ".\n")
 
 '''
 ***************************************************************************
@@ -303,5 +312,6 @@ for directory in CONF.backup_dirs():
     BACKUP_SIZE.append({'file_path': path, 'file_size': size})
 
 
-PAYLOAD.append({'user': USER, 'last_run': FILEDATE, 'backup_size': BACKUP_SIZE, 'backup_log': LOG_CONTENT})
+PAYLOAD.append({"user": USER, "last_run": FILEDATE, "backup_size": BACKUP_SIZE, \
+                "backup_log": LOG_CONTENT})
 # print(PAYLOAD)

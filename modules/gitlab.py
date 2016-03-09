@@ -7,7 +7,8 @@ Authors/Maintainers:    Rich Nason (rnason@clusterfrak.com)
 Description:            This Module will handle the actual gitlab backup.
 ***************************************************************************
 """
-# This module expects that your backup local directory is set to the default location of /var/opt/gitlab/backups.
+# This module expects that your backup local directory is set to the default
+# location of /var/opt/gitlab/backups.
 # This setting can be found in the /etc/gitlab/gitlab.rb file
 # gitlab_rails['backup_path'] = "/var/opt/gitlab/backups"
 
@@ -22,22 +23,23 @@ def gitlab_backup_job(localdir, filedate, args):
     """The module will perform the actual gitlab backup"""
     # We don't need the config in this job so remove the variable to clear pylint errors
     # del args
-    
+
     # Load the module aregments and jsonify them
-    args = args.replace("'","\"")
+    args = args.replace("'", "\"")
     args = json.loads(args)
-    
+
     if 'gitlab_backup_path' in args:
         gitlab_path = args['gitlab_backup_path']
     else:
         gitlab_path = '/var/opt/gitlab/backups'
 
     # Print a warning to the user letting them know the location of the back up file settings.
-    print('----------------------------------------------------------------------------------------------------------------')
-    print("This job assumes that the backup location set in your /etc/gitlab/gitlab.rb file is set to:")
-    print(gitlab_path + "\n")
-    print("If you would like to change this path, please set 'gitlab_backup_path' in the module_args section of the config")
-    print('----------------------------------------------------------------------------------------------------------------')
+    print('--------------------------------------------------------------------------------')
+    print("This job assumes that the backup location set in your /etc/gitlab/gitlab.rb file")
+    print("is set to : " + gitlab_path + "\n")
+    print("If you would like to change this path, please set 'gitlab_backup_path'")
+    print("in the module_args section of the config")
+    print('--------------------------------------------------------------------------------')
 
     # Set the file date (remove the timestamp and just keep the date portion)
     filedate = str(filedate).split(" ")

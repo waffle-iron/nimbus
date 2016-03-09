@@ -4,12 +4,14 @@
 Script:                 Nimbus Intermixed Modular Back Up Script
 Library:				Config Parse class
 Authors/Maintainers:    Rich Nason (rnason@clusterfrak.com)
-Description:            This class will handle parsing the included configuration file and returning a config object.
+Description:            This class will handle parsing the included configuration
+                        file and returning a config object.
 ***************************************************************************
 """
 
 
 class ParseConf(object):
+    """This class will parse the config file and send the variables to the main application"""
     json = __import__('json')  # Used to parse the json config file
     pyos = __import__('os')  # Used to check the physical settings file location
     sys = __import__('sys')  # Used to system exit functions on error
@@ -23,10 +25,12 @@ class ParseConf(object):
                 self.server_config = self.json.loads(self.config_file.read())
                 self.config_file.close()
         else:
-            print("Specified configuration file does not exist. Please check the path and try again!\n")
+            print("Specified configuration file does not exist.")
+            print("Please check the path and try again!\n")
             raise SystemExit(" ERROR: Specified Configuration File Not Found")
 
     def print_header(self):
+        """This function simply prints the header of the config settings"""
         print('\n')
         print('===================================')
         print('Backup Settings:')
@@ -34,6 +38,7 @@ class ParseConf(object):
         print('-----------------------------------')
 
     def backup_dirs(self):
+        """This function assigns the backup directories in the settings file"""
         # Load list of backup directories
         if 'backup_directories' in self.server_config:
             directory_list = self.server_config['backup_directories']
@@ -82,10 +87,12 @@ class ParseConf(object):
                     except FileNotFoundError:
                         print("WARNING: " + path + dir_name + "could not be created")
         else:
-            directory_list = '[{directory: "Not Defined, "path": "Not Defined", "retention_days": "Not Defined", "type": "Not Defined"}]'
+            directory_list = '[{"directory": "Not Defined", "path": "Not Defined", '\
+            '"retention_days": "Not Defined", "type": "Not Defined"}]'
         return directory_list
 
     def print_backup_dirs(self):
+        """This function prints all of the backup directories on the screen at run time"""
         # Print the list of backup directories defined in the global variable DIRECTORY_LIST
         print('Backup Directories:')
         directory_list = self.backup_dirs()
@@ -97,16 +104,18 @@ class ParseConf(object):
             print('\t\t' + 'type: ' + directory.get('type'))
 
     def module_args(self):
+        """This function parses the included module arguments"""
         # Load the binary executable location
         if 'module_args' in self.server_config:
             module_arg_list = str(self.server_config['module_args'])
-            module_arg_list = module_arg_list.replace("'","\"")
+            module_arg_list = module_arg_list.replace("'", "\"")
         else:
             module_arg_list = None
-        
+
         return module_arg_list
 
     def print_module_args(self):
+        """This funtion prints all of the included module arguments at run time"""
         # Print mail sender config
         module_arg_list = self.json.loads(self.module_args())
         print("Module Arguments:")
@@ -114,6 +123,7 @@ class ParseConf(object):
             print('\t' + arg + ': ' + value)
 
     def mail_sender(self):
+        """This function sets up the mail send user from the settings file"""
         # Load mail sender config
         if 'mail_sender' in self.server_config:
             mail_sender = self.server_config['mail_sender']
@@ -122,11 +132,13 @@ class ParseConf(object):
         return mail_sender
 
     def print_mail_sender(self):
+        """This function prints the mail send user included in the settings file"""
         # Print mail sender config
         mail_sender = self.mail_sender()
         print("Using Mail Sender: " + str(mail_sender))
 
     def mail_recipients(self):
+        """This function sets up the mail recipients listed in the settings file"""
         # Load mail recipients config
         if 'mail_recipients' in self.server_config:
             mail_recipients = self.server_config['mail_recipients']
@@ -135,10 +147,12 @@ class ParseConf(object):
         return mail_recipients
 
     def print_mail_recipients(self):
+        """This function prints the mail recipients listed in the settings file"""
         # Print mail recipients config
         mail_recipients = self.mail_recipients()
         print("Using Mail Recipients: " + str(mail_recipients))
 
     def print_footer(self):
+        """This function prints the footer of the settings at run time"""
         print('===================================')
         print('\n')

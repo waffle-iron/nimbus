@@ -19,6 +19,11 @@ import json  # This is loaded to parse the server_settings.ini file
 def postgres_backup_job(localdir, filedate, args):
     """The module will perform the actual postgres backup"""
     # Get the module arguments
+    # del args
+
+    # Load the module aregments and jsonify them
+    args = args.replace("'", "\"")
+    args = json.loads(args)
 
     # Get postgres version
     if 'pg_ver' in args:
@@ -48,6 +53,7 @@ def postgres_backup_job(localdir, filedate, args):
     else:
         pg_password = ""
 
+    # Get Host Info
     if 'pg_host' in args:
         pg_host = args['pg_host']
     else:
@@ -65,12 +71,13 @@ def postgres_backup_job(localdir, filedate, args):
         db_list = "postgres"
 
     # Print a warning to the user letting them know the location of the back up file settings.
-    print('----------------------------------------------------------------------------------------------------------------')
+    print('----------------------------------------------------------------------------')
     print("This job assumes that the the following: ")
     print("pg_dump is located in: " + pg_dump)
     print("pg_dumpall is located in: " + pg_dumpall)
-    print("If you would like to change this path, please set 'pg_dump' and pg_dumpall in the module_args section of the config")
-    print('----------------------------------------------------------------------------------------------------------------\n')
+    print("If you would like to change this path, please set 'pg_dump' and 'pg_dumpall'")
+    print("in the module_args section of the settings file")
+    print('--------------------------------------------------------------------------\n')
 
     # Set the file date (remove the timestamp and just keep the date portion)
     filedate = str(filedate).split(" ")
@@ -86,16 +93,24 @@ def postgres_backup_job(localdir, filedate, args):
     # Perform the backup of the databases
     print("Running backup job...\n")
     for database in db_list:
-        db_dump_cmd = pg_dump + "-h" + pg_host + "-p" + pg_port + "-U" + pg_user + "-P" + pg_password \
-            + database + " > " + tmp_dir + "/" + database + "-" + filedate + ".sql"
+        db_dump_cmd = pg_dump + "-h" + pg_host + "-p" + pg_port + "-U" + pg_user \
+        + "-P" + pg_password + database + " > " + tmp_dir + "/" + database + "-" + filedate + ".sql"
 
-    # execute_backup = os.popen(db_dump_cmd)
-    # job_log = execute_backup.read()
-    # execute_backup.close()
+    # Execute the Database Backups
+    execute_backup = os.popen(db_dump_cmd)
+    job_log = execute_backup.read()
+    execute_backup.close()
 
     # Backup the pg_roles
-    db_dumpall_cmd = pg_dumpall + "-h" + pg_host + "-p" + pg_port + "-U" + pg_user + "-P" + pg_password \
-        + "-v --globals-only > " + tmp_dir + "/" + "pg_roles-" + filedate + ".sql"
+    db_dumpall_cmd = pg_dumpall + "-h" + pg_host + "-p" + pg_port + "-U" + pg_user \
+    + "-P" + pg_password + "-v --globals-only > " + tmp_dir + "/" + "pg_roles-" + filedate + ".sql"
+
+    execute_backup_roles = os.popen(db_dumpall_cmd)
+    job_log_roles = execute_backup.read()
+    execute_backup_roles.close()
+
+    # Concat the logs
+    job_log = job_log + job_log_roles
 
     # Copy the pg_hba and postgres config files
     print("\n")
