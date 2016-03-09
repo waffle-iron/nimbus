@@ -50,8 +50,11 @@ def postgres_backup_job(localdir, filedate, args):
 
     if 'pg_password' in args:
         pg_password = args['pg_password']
+        
+        if pg_password == "":
+            pg_password = "\"\"" 
     else:
-        pg_password = ""
+        pg_password = "\"\""
 
     # Get Host Info
     if 'pg_host' in args:
@@ -86,38 +89,67 @@ def postgres_backup_job(localdir, filedate, args):
     # Create a temp directory to store the backup files in
     try:
         tmp_dir = '/tmp/postgres_' + filedate
+        if os.path.isdir(tmp_dir):
+            shutil.rmtree(tmp_dir)
         os.makedirs(tmp_dir)
     except:
         raise SystemExit(" ERROR: Failed to create tmp backup folder")
 
     # Perform the backup of the databases
     print("Running backup job...\n")
+    joblog = ""
     for database in db_list:
-        db_dump_cmd = pg_dump + "-h" + pg_host + "-p" + pg_port + "-U" + pg_user \
-        + "-P" + pg_password + database + " > " + tmp_dir + "/" + database + "-" + filedate + ".sql"
+        # print(database)
+        # db_dump_cmd = pg_dump + " -h " + pg_host + " -p " + str(pg_port) + " -U " + pg_user + \
+        # " -w " + " " + database + " > " + tmp_dir + "/" + database + "-" + filedate + ".sql"
+        db_dump_cmd = pg_dump + " --dbname=postgresql://" + pg_user + ":" + pg_password + "@" \
+        + pg_host + ":" + str(pg_port) + "/" + database
 
-    # Execute the Database Backups
-    execute_backup = os.popen(db_dump_cmd)
-    job_log = execute_backup.read()
-    execute_backup.close()
+        # Execute the Database Backups
+        # print(db_dump_cmd)
+        job_log = "Running " + database + " backup:\n"
+        execute_backup = os.popen(db_dump_cmd)
+        backup_log = execute_backup.read()
+        execute_backup.close()
+
+        # Concat all of the backup files
+        job_log = job_log + "\n" + backup_log
 
     # Backup the pg_roles
-    db_dumpall_cmd = pg_dumpall + "-h" + pg_host + "-p" + pg_port + "-U" + pg_user \
-    + "-P" + pg_password + "-v --globals-only > " + tmp_dir + "/" + "pg_roles-" + filedate + ".sql"
+    db_dumpall_cmd = pg_dumpall + " -h " + pg_host + " -p " + str(pg_port) + " -U " + pg_user + \
+    " -w " + " -v --globals-only > " + tmp_dir + "/" + "pg_roles-" + filedate + ".sql"
 
     execute_backup_roles = os.popen(db_dumpall_cmd)
-    job_log_roles = execute_backup.read()
+    job_log_roles = execute_backup_roles.read()
     execute_backup_roles.close()
 
     # Concat the logs
-    job_log = job_log + job_log_roles
+    job_log = job_log + "\n" + job_log_roles
 
     # Copy the pg_hba and postgres config files
     print("\n")
     print("Backing up configuration files...")
     print("---------------------------------\n")
-    shutil.copyfile('/var/lib/pgsql/' + pg_ver + '/data/pg_hba.conf', tmp_dir)
-    shutil.copyfile('/var/lib/pgsql/' + pg_ver + '9.4/data/postgresql.conf', tmp_dir)
+    try:
+        if os.path.isfile("/var/lib/pgsql/" + pg_ver + "/data/pg_hba.conf"):
+            pg_hba = "/var/lib/pgsql/" + pg_ver + "/data/pg_hba.conf"
+        elif os.path.isfile("/var/lib/pgsql/data/pg_hba.conf"):
+            pg_hba = "/var/lib/pgsql/data/pg_hba.conf"
+    except FileNotFoundError:
+        print("Error: File Not Found!")
+        raise SystemError(" ERROR: File not found, please ensure postgres-server is properly installed!")
+
+    try:
+        if os.path.isfile("/var/lib/pgsql/" + pg_ver + "/data/postgresql.conf"):
+            pg_conf = "/var/lib/pgsql/" + pg_ver + "/data/postgresql.conf"
+        elif os.path.isfile("/var/lib/pgsql/data/postgresql.conf"):
+            pg_conf = "/var/lib/pgsql/data/postgresql.conf"
+    except FileNotFoundError:
+        print("Error: File Not Found!")
+        raise SystemError(" ERROR: File not found, please ensure postgres-server is properly installed!")
+
+    shutil.copyfile(pg_hba, tmp_dir + "/pg_hba")
+    shutil.copyfile(pg_conf, tmp_dir + "/postgres.conf")
 
     # Tar up the backup and move it to the local backup directory.
     print("Creating backup archive...")

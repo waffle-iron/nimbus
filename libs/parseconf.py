@@ -120,7 +120,7 @@ class ParseConf(object):
         module_arg_list = self.json.loads(self.module_args())
         print("Module Arguments:")
         for arg, value in module_arg_list.items():
-            print('\t' + arg + ': ' + value)
+            print('\t' + str(arg) + ': ' + str(value))
 
     def mail_sender(self):
         """This function sets up the mail send user from the settings file"""
