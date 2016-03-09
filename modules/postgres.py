@@ -169,18 +169,19 @@ def postgres_backup_job(localdir, filedate, args):
     print("--------------------------------------------\n")
     try:
         shutil.move(tar_path, localdir + "/" + tar_name)
+        # Since we move the tar and remove the tmp dir, repath the tar_path to pass back to main
+        tar_path = localdir + "/" + tar_name
     except OSError as err:
         print("OS error: {0}".format(err))
         raise SystemError(" ERROR: Backup could not be moved!")
 
     # Remove the tmp directory.
-    for file_name in os.listdir(tmp_dir):
-        try:
-            # os.remove(gitlab_path + "/" + file_name)
-            shutil.rmtree(tmp_dir)
-        except OSError as err:
-            print("OS error: {0}".format(err))
-            raise SystemError(" ERROR: " + file_name + " could not be removed.")
+    try:
+        # os.remove(gitlab_path + "/" + file_name)
+        shutil.rmtree(tmp_dir)
+    except OSError as err:
+        print("OS error: {0}".format(err))
+        raise SystemError(" ERROR: " + tmp_dir + " could not be removed.")
 
     print("Job backup module completed...")
     print("-----------------------------\n")
