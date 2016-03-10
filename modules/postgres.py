@@ -82,9 +82,13 @@ def postgres_backup_job(localdir, filedate, args):
     print("in the module_args section of the settings file")
     print('--------------------------------------------------------------------------\n')
 
-    # Set the file date (remove the timestamp and just keep the date portion)
+    # Set the file date (separate the timestamp and date portion)
     filedate = str(filedate).split(" ")
-    filedate = filedate[0]
+    timestamp = filedate[1]
+    timestamp = str(timestamp).split(".")
+    timestamp = str(timestamp[0]).replace(":", "-")
+    filedate = filedate[0] + "_" + timestamp
+    
 
     # Create a temp directory to store the backup files in
     try:
@@ -97,23 +101,25 @@ def postgres_backup_job(localdir, filedate, args):
 
     # Perform the backup of the databases
     print("Running backup job...\n")
-    joblog = ""
+    job_log = None
     for database in db_list:
         # print(database)
-        # db_dump_cmd = pg_dump + " -h " + pg_host + " -p " + str(pg_port) + " -U " + pg_user + \
-        # " -w " + " " + database + " > " + tmp_dir + "/" + database + "-" + filedate + ".sql"
-        db_dump_cmd = pg_dump + " --dbname=postgresql://" + pg_user + ":" + pg_password + "@" \
-        + pg_host + ":" + str(pg_port) + "/" + database
+        db_dump_cmd = pg_dump + " -h " + pg_host + " -p " + str(pg_port) + " -U " + pg_user + \
+        " -w " + " " + database + " > " + tmp_dir + "/" + database + "-" + filedate + ".sql"
 
         # Execute the Database Backups
         # print(db_dump_cmd)
-        job_log = "Running " + database + " backup:\n"
+        job_log_header = "Running " + database + " backup...\n"
         execute_backup = os.popen(db_dump_cmd)
         backup_log = execute_backup.read()
         execute_backup.close()
 
         # Concat all of the backup files
-        job_log = job_log + "\n" + backup_log
+        if job_log is None:
+            job_log = job_log_header
+            job_log = job_log + "\n" + backup_log
+        else:
+            job_log = job_log + "\n" + job_log_header + "\n" + backup_log
 
     # Backup the pg_roles
     db_dumpall_cmd = pg_dumpall + " -h " + pg_host + " -p " + str(pg_port) + " -U " + pg_user + \
@@ -177,7 +183,6 @@ def postgres_backup_job(localdir, filedate, args):
 
     # Remove the tmp directory.
     try:
-        # os.remove(gitlab_path + "/" + file_name)
         shutil.rmtree(tmp_dir)
     except OSError as err:
         print("OS error: {0}".format(err))

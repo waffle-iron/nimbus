@@ -41,9 +41,12 @@ def gitlab_backup_job(localdir, filedate, args):
     print("in the module_args section of the config")
     print('--------------------------------------------------------------------------------')
 
-    # Set the file date (remove the timestamp and just keep the date portion)
+    # Set the file date (separate the timestamp and date portion)
     filedate = str(filedate).split(" ")
-    filedate = filedate[0]
+    timestamp = filedate[1]
+    timestamp = str(timestamp).split(".")
+    timestamp = str(timestamp[0]).replace(":", "-")
+    filedate = filedate[0] + "_" + timestamp
 
     # If any files currently exist in that directory then remove them all..
     if os.path.isdir(gitlab_path):

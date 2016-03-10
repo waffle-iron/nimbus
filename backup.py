@@ -88,6 +88,8 @@ Set Global Variables and Parse the config file
 # FILEDATE = time.strftime("%Y-%m-%d %H:%M:%S")
 USER = os.getlogin()
 FILEDATE = datetime.datetime.today()
+print(FILEDATE)
+print(datetime.datetime.now())
 DISPLAYDATE = time.strftime("%a %B %d, %Y")
 MAIL_SUBJECT = APP + ' Backup Report - ' + DISPLAYDATE
 LOGFILEDIR = '/var/log/nimbus'
@@ -247,7 +249,7 @@ for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
     path = directory.get('path')
     # Write Log Header
-    write_log("Files moved to " + path + dir_name + " folder:\n")
+    write_log("Files inventory of " + path + dir_name + " folder:\n")
     write_log("============================================================\n")
     for file_name in os.listdir(path + dir_name):
         report_cmd = "ls -lah " + path + dir_name + "| grep " + file_name + \
