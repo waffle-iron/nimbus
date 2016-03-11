@@ -50,7 +50,7 @@ Get Passed Arguments and Build the Help feature.
 BACKUP_JOB_DESC = """
 The backup job module that you want to run.
 Available module options currently are:
-postgres, mysql, gitlab, jenkins
+postgres, mysql, mariadb, gitlab, jenkins
 """
 CONFIG_FILE_DESC = """
 The full path location of the config file that holds the options
@@ -88,8 +88,6 @@ Set Global Variables and Parse the config file
 # FILEDATE = time.strftime("%Y-%m-%d %H:%M:%S")
 USER = os.getlogin()
 FILEDATE = datetime.datetime.today()
-print(FILEDATE)
-print(datetime.datetime.now())
 DISPLAYDATE = time.strftime("%a %B %d, %Y")
 MAIL_SUBJECT = APP + ' Backup Report - ' + DISPLAYDATE
 LOGFILEDIR = '/var/log/nimbus'

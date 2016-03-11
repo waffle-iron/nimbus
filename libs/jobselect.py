@@ -23,7 +23,7 @@ def module_select(backup_job):
     elif backup_job == 'POSTGRES':
         module_name = 'PostgreSQL'
         run_module = postgres_backup_job
-    elif backup_job == 'MYSQL':
+    elif backup_job == 'MYSQL' or backup_job == 'MARIADB':
         module_name = 'MySQL'
         run_module = mysql_backup_job
     elif backup_job == 'JENKINS':
@@ -33,4 +33,3 @@ def module_select(backup_job):
         raise SystemExit(" ERROR: You have identified an Undefined Backup Job.. Please try again")
 
     return (module_name, run_module)
-

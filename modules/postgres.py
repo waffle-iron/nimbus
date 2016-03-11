@@ -50,9 +50,9 @@ def postgres_backup_job(localdir, filedate, args):
 
     if 'pg_password' in args:
         pg_password = args['pg_password']
-        
+
         if pg_password == "":
-            pg_password = "\"\"" 
+            pg_password = "\"\""
     else:
         pg_password = "\"\""
 
@@ -88,7 +88,7 @@ def postgres_backup_job(localdir, filedate, args):
     timestamp = str(timestamp).split(".")
     timestamp = str(timestamp[0]).replace(":", "-")
     filedate = filedate[0] + "_" + timestamp
-    
+
 
     # Create a temp directory to store the backup files in
     try:
@@ -143,7 +143,7 @@ def postgres_backup_job(localdir, filedate, args):
             pg_hba = "/var/lib/pgsql/data/pg_hba.conf"
     except FileNotFoundError:
         print("Error: File Not Found!")
-        raise SystemError(" ERROR: File not found, please ensure postgres-server is properly installed!")
+        raise SystemError("ERROR: pg_hba not found, is postgres-server properly installed!")
 
     try:
         if os.path.isfile("/var/lib/pgsql/" + pg_ver + "/data/postgresql.conf"):
@@ -152,7 +152,7 @@ def postgres_backup_job(localdir, filedate, args):
             pg_conf = "/var/lib/pgsql/data/postgresql.conf"
     except FileNotFoundError:
         print("Error: File Not Found!")
-        raise SystemError(" ERROR: File not found, please ensure postgres-server is properly installed!")
+        raise SystemError("ERROR: pg_hba not found, is postgres-server properly installed!")
 
     shutil.copyfile(pg_hba, tmp_dir + "/pg_hba")
     shutil.copyfile(pg_conf, tmp_dir + "/postgres.conf")
