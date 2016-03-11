@@ -48,7 +48,7 @@ def mysql_backup_job(localdir, filedate, args):
     if 'mysql_port' in args:
         mysql_port = args['mysql_port']
     else:
-        mysql_port = 5432
+        mysql_port = 3306
 
     # Get list of databases to back up.
     if 'db_list' in args:
@@ -77,9 +77,11 @@ def mysql_backup_job(localdir, filedate, args):
     job_log = None
     for database in db_list:
         # print(database)
-        db_dump_cmd = "mysqldump" + " -h " + mysql_host + " -P " + str(mysql_port) + " -u " \
-        + mysql_user + " -p " + mysql_password + database + " > " + tmp_dir + "/" + database \
+        db_dump_cmd = "mysqldump" + " -h " + mysql_host + " -P " + str(mysql_port) + " --user=" \
+        + mysql_user + " --password=" + mysql_password + " " + database + " > " + tmp_dir + "/" + database \
         + "-" + filedate + ".sql"
+
+        print(db_dump_cmd)
 
         # Execute the Database Backups
         # print(db_dump_cmd)
@@ -108,7 +110,7 @@ def mysql_backup_job(localdir, filedate, args):
         print("Error: File Not Found!")
         raise SystemError("ERROR: my.cnf not found, is mysql-server properly installed!")
 
-    shutil.copyfile(my_cnf, tmp_dir + "/pg_hba")
+    shutil.copyfile(my_cnf, tmp_dir + "/my.cnf")
 
     # Tar up the backup and move it to the local backup directory.
     print("Creating backup archive...")
