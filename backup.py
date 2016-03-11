@@ -130,7 +130,7 @@ for directory in CONF.backup_dirs():
     if LOCALDIR is None:
         if dir_type == "local":
             LOCALDIR = path + dir_name
-            print("INFO: " + LOCALDIR + " directory location set!")
+            print("INFO: " + LOCALDIR + " directory location set!\n")
         else:
             print()
             raise SystemExit("ERROR: At least one directory in the configuration \
@@ -164,8 +164,8 @@ Perform a clean up on the directories according to your the parsed retention pol
 ***************************************************************************
 '''
 # Write Log header
-write_log("Cleaning files accourding to set retention:\n")
-write_log("============================================================\n")
+write_log("Cleaning files according to set retention:\n")
+write_log("============================================================\n\n")
 
 # Keep a counter and print the number of files removed vs number of files deleted
 DELETED_FILES = 0
@@ -190,18 +190,21 @@ for directory in CONF.backup_dirs():
             write_log(filepath + file_name + " removed (" + str(file_age.days) + " days old)\n")
             try:
                 os.remove(filepath + file_name)
+                # print("Deleting File")
+                # print(filepath + file_name)
                 DELETED_FILES += 1
+                # print(DELETED_FILES)
             except OSError as err:
                 print("OS error: {0}".format(err))
                 raise SystemExit(filepath + file_name + " could not be removed.")
 
         else:
+            # print("Saving File")
+            # print(filepath + file_name)
             KEPT_FILES += 1
+            # print(KEPT_FILES)
             # print("File Saved!: ")
             # print(path + dir_name + "/" + file_name + " - " + str(file_age.days) + " days old")
-write_log("============================================================\n\n")
-write_log(str(DELETED_FILES) + " files exceeded the retention period and have been removed.\n")
-write_log(str(KEPT_FILES) + " files are within the retention period and have been saved.\n\n\n")
 
 '''
 ***************************************************************************
@@ -210,19 +213,36 @@ Run the backup job
 '''
 # Write Log header
 write_log("Performing backup operation:\n")
-write_log("============================================================\n")
+write_log("============================================================\n\n")
+
+# Start the timer so we can time how long the backup module takes to complete
+JOB_START = datetime.datetime.now()
 
 # Set the logging variable, and execute the backup job.
 ARCHIVE_NAME, JOB_LOG = JOB(LOCALDIR, FILEDATE, CONF.module_args())
-write_log(JOB_LOG + "\n")
+write_log(JOB_LOG + "\n\n")
 
-write_log("============================================================\n\n")
+# Look at the end time and then print the delta
+JOB_END = datetime.datetime.now()
+
+ELAPSED_TIME = JOB_END - JOB_START
+DAYS = ELAPSED_TIME.days
+HOURS = ELAPSED_TIME.seconds // 3600
+MIN = (ELAPSED_TIME.seconds % 3600) // 60
+SEC = (ELAPSED_TIME.seconds % 60)
+TIME = (str(DAYS) + " days, " + str(HOURS) + " hours, " + str(MIN) + " min, " + str(SEC) + " sec")
+
+write_log("Backup module completed and took: " + TIME + "\n\n\n")
+print("Job module took: " + TIME + "\n")
 
 '''
 ***************************************************************************
 Copy the backups to the remote directories
 ***************************************************************************
 '''
+write_log("Copying Files from local directory to all remote directories\n")
+write_log("============================================================\n\n")
+
 # For each of the listed directories, copy the backup file from the local directory
 # to each of the backup locations.
 print("Copying backup from local directory to all included remote directories...")
@@ -233,7 +253,14 @@ for directory in CONF.backup_dirs():
     dir_type = directory.get('type')
 
     if dir_type != "local":
-        shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path + dir_name + "/")
+        try:
+            shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path + dir_name + "/")
+            KEPT_FILES += 1
+        except OSError as err:
+                print("OS error: {0}".format(err))
+                raise SystemExit(filepath + file_name + " could not be copied to the specified directory.")
+    else:
+        KEPT_FILES += 1
 
 '''
 ***************************************************************************
@@ -243,6 +270,11 @@ Print the log report
 # Go to All of the backup directories and list out the contents of the dirctories.
 print("Print out directory content reports...")
 print("--------------------------------------\n")
+
+# Write the number of files removed/retained in the logfile
+write_log(str(DELETED_FILES) + " files exceeded the retention period and have been removed.\n")
+write_log(str(KEPT_FILES) + " files are within the retention period and have been saved.\n\n")
+
 for directory in CONF.backup_dirs():
     dir_name = directory.get('directory')
     path = directory.get('path')
@@ -313,5 +345,5 @@ for directory in CONF.backup_dirs():
 
 
 PAYLOAD.append({"user": USER, "last_run": FILEDATE, "backup_size": BACKUP_SIZE, \
-                "backup_log": LOG_CONTENT})
-# print(PAYLOAD)
+                "backup_log": LOG_CONTENT, "backup_time": TIME})
+print(PAYLOAD)
