@@ -73,7 +73,8 @@ def mysql_backup_job(localdir, filedate, args):
         raise SystemExit(" ERROR: Failed to create tmp backup folder")
 
     # Perform the backup of the databases
-    print("Running backup job...\n")
+    print("Running backup job...")
+    print("--------------------------------------\n")
     job_log = None
     for database in db_list:
         # print(database)
@@ -81,11 +82,12 @@ def mysql_backup_job(localdir, filedate, args):
         + mysql_user + " --password=" + mysql_password + " " + database + " > " + tmp_dir + "/" + database \
         + "-" + filedate + ".sql"
 
-        print(db_dump_cmd)
+        # print(db_dump_cmd)
 
         # Execute the Database Backups
         # print(db_dump_cmd)
-        job_log_header = "Running " + database + " backup...\n"
+        job_log_header = "Running " + database + " backup..."
+        print("Running " + database + " backup...")
         execute_backup = os.popen(db_dump_cmd)
         backup_log = execute_backup.read()
         execute_backup.close()

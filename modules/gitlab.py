@@ -70,7 +70,8 @@ def gitlab_backup_job(localdir, filedate, args):
         except FileNotFoundError:
             print(gitlab_path + " could not be created.")
 
-    print("Running backup job...\n")
+    print("Running backup job...")
+    print("--------------------------------------\n")
     execute_backup = os.popen('/opt/gitlab/bin/gitlab-rake gitlab:backup:create')
     # execute_backup = os.popen("echo 'ran the job' > /var/opt/gitlab/backups/gitlab_backup.file")
     job_log = execute_backup.read()
