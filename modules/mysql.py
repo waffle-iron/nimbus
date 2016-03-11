@@ -77,7 +77,7 @@ def mysql_backup_job(localdir, filedate, args):
     job_log = None
     for database in db_list:
         # print(database)
-        db_dump_cmd = "mysqldump" + " -h " + mysql_host + " -p " + str(mysql_port) + " -u " \
+        db_dump_cmd = "mysqldump" + " -h " + mysql_host + " -P " + str(mysql_port) + " -u " \
         + mysql_user + " -p " + mysql_password + database + " > " + tmp_dir + "/" + database \
         + "-" + filedate + ".sql"
 
