@@ -57,12 +57,17 @@ The full path location of the config file that holds the options
 for the backup job that you would like to run.
 (/root/backup/mygitserver.ini)
 """
+VERSION_FILE_DESC = """
+NIMBUS MODULAR BACKUP UTILITY:
+VERSION: VERSION-NUMBER
+"""
 
 # Parse input arguments #
 PARSE = argparse.ArgumentParser(description='NIMBUS is a modular backup utility \
                                 designed to backup many different type of applications')
 PARSE.add_argument('-b', '--backup', help=BACKUP_JOB_DESC, required=True)
 PARSE.add_argument('-c', '--config', help=CONFIG_FILE_DESC, required=True)
+PARSE.add_argument('-v', '--version', help=VERSION_FILE_DESC, required=True)
 ARGS = PARSE.parse_args()
 
 # Show Argument Values #
