@@ -67,7 +67,7 @@ PARSE = argparse.ArgumentParser(description='NIMBUS is a modular backup utility 
                                 designed to backup many different type of applications')
 PARSE.add_argument('-b', '--backup', help=BACKUP_JOB_DESC, required=True)
 PARSE.add_argument('-c', '--config', help=CONFIG_FILE_DESC, required=True)
-PARSE.add_argument('version', help=VERSION_FILE_DESC, required=False)
+PARSE.add_argument('version', help=VERSION_FILE_DESC)
 ARGS = PARSE.parse_args()
 
 # Show Argument Values #
