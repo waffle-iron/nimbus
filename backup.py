@@ -67,7 +67,8 @@ PARSE = argparse.ArgumentParser(description='NIMBUS is a modular backup utility 
                                 designed to backup many different type of applications')
 PARSE.add_argument('-b', '--backup', help=BACKUP_JOB_DESC, required=True)
 PARSE.add_argument('-c', '--config', help=CONFIG_FILE_DESC, required=True)
-PARSE.add_argument('-v', '--version', action='version', version='VERSION-NUMBER', help=VERSION_FILE_DESC)
+PARSE.add_argument('-v', '--version', action='version',
+                   version='VERSION-NUMBER', help=VERSION_FILE_DESC)
 ARGS = PARSE.parse_args()
 
 # Show Argument Values #
@@ -262,8 +263,10 @@ for directory in CONF.backup_dirs():
             shutil.copy2(LOCALDIR + "/" + ARCHIVE_NAME, path + dir_name + "/")
             KEPT_FILES += 1
         except OSError as err:
-                print("OS error: {0}".format(err))
-                raise SystemExit(filepath + file_name + " could not be copied to the specified directory.")
+            print("OS error: {0}".format(err))
+            raise SystemExit(
+                LOCALDIR + ARCHIVE_NAME +
+                " could not be copied to the specified directory.")
     else:
         KEPT_FILES += 1
 
